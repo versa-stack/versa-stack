@@ -1,0 +1,4 @@
+imports:
+- ./bar.yaml
+
+foo: bar

@@ -1,0 +1,9 @@
+imports:
+  - ./baz.yaml
+
+foo: bar
+
+some_list:
+  - four
+  - five
+  - six

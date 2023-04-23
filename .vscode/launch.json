@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run pipeline",
+      "program": "${workspaceFolder}/workspace/apps/versa-cli/bin/versa-cli.js",
+      "args": ["run"],
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart",
+      "preLaunchTask": "build"
+    }
+  ]
+}

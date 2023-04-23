@@ -1,0 +1,22 @@
+name: versa-stack
+
+order:
+  - dependencies
+  - test
+  - compile
+  - package
+  - publish
+
+stages:
+  dependencies:
+    - name: pnpm-install-r
+      scripts:
+        - pnpm install -r
+  test:
+    - name: pnpm-test-r
+      scripts:
+        - pnpm run -r test
+  compile:
+    - name: pnpm-build-r
+      scripts:
+        - pnpm run -r build

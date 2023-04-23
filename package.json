@@ -1,0 +1,24 @@
+{
+  "name": "@versa-stack/versa-stack",
+  "version": "0.4.0",
+  "description": "",
+  "keywords": [
+    "ci",
+    "pipeline",
+    "modular",
+    "gluegun"
+  ],
+  "author": "Khair-ed-Din Husseini <kmhusseini@gmail.com>",
+  "devDependencies": {
+    "@algolia/client-search": "^4",
+    "@types/node": "^18.15.12",
+    "vitepress": "^v1.0.0-alpha.73",
+    "vue": "^3.2.47"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
+  },
+  "license": "MIT"
+}

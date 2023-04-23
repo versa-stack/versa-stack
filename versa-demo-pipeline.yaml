@@ -1,0 +1,17 @@
+name: versa
+
+order:
+  - test
+
+stages:
+  test:
+    - name: hello world
+      image: alpine
+      scripts:
+        - echo "hello world"
+        - sleep 3
+        - echo "hello world again"
+    - name: number two
+      image: alpine
+      scripts:
+        - echo "another task run in parallel."

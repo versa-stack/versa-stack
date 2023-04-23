@@ -1,0 +1,48 @@
+{
+  "name": "@versa-stack/versa-config",
+  "version": "0.0.0",
+  "description": "Dynamic yaml configuration",
+  "scripts": {
+    "clean-build": "rm -rf ./lib tsconfig.tsbuildinfo",
+    "test": "jest",
+    "compile": "tsc",
+    "build:clean": "pnpm run clean-build && pnpm run compile",
+    "build": "pnpm run compile",
+    "build:watch": "nodemon -w src/ -e ts --exec pnpm run build"
+  },
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "files": [
+    "/lib"
+  ],
+  "keywords": [
+    "yaml",
+    "dynamic",
+    "configuration"
+  ],
+  "author": "kmhusseini@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "deepmerge": "^4.3.1",
+    "get-uri": "^4.0.0",
+    "jsonpath": "^1.1.1",
+    "yaml": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/bunyan-blackhole": "^0.2.2",
+    "@types/jest": "^29.5.0",
+    "@types/jsonpath": "^0.2.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.15.11",
+    "bunyan": "^1.8.15",
+    "bunyan-blackhole": "^1.1.1",
+    "ftp-srv": "^4.6.2",
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "selfsigned": "^2.1.1",
+    "st": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}

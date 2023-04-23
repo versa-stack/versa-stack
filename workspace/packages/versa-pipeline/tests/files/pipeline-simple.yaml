@@ -1,0 +1,21 @@
+name: pipeline-simple
+order:
+  - first
+  - second
+  - third
+
+stages:
+  first:
+    - name: job1
+      scripts:
+        - echo "job1"
+  second:
+    - name: job2
+      scripts:
+        - echo "job2"
+  third:
+    - name: job3
+      depends:
+        - first:job1
+      scripts:
+        - echo "job3"

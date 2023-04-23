@@ -1,0 +1,7 @@
+order:
+  - test
+
+stages:
+  test:
+    - name: jest
+      scripts: $[configs.repository.exampleTask.scripts}

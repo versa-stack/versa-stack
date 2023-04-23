@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": true,
+    "declarationDir": "build/types",
+    "esModuleInterop": true,
+    "incremental": true,
+    "lib": ["es2021"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "build",
+    "resolveJsonModule": true,
+    "rootDir": "src",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2021",
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "./tests/**/*.ts"],
+  "ts-node": {
+    "files": true
+  }
+}

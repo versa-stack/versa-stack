@@ -1,0 +1,7 @@
+imports:
+- http://127.0.0.1:${port}/foz.yaml
+foo: remote
+some_list:
+- one
+- two
+- three
