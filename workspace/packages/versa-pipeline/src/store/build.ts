@@ -83,7 +83,7 @@ export const buildJob = (payload: BuildJobPayload): Job => {
     return async (output, filters) => {
       const runPayload = {
         ...payload,
-        output: output({ payload }),
+        output: output(payload),
       };
 
       const filterTaskResult = applyFilters(runPayload, filters);
@@ -106,7 +106,7 @@ export const buildJob = (payload: BuildJobPayload): Job => {
   return async (output, filters) => {
     const runPayload = {
       ...payload,
-      output: output({ payload }),
+      output: output(payload),
     };
 
     const filterTaskResult = applyFilters(runPayload, filters);
@@ -120,7 +120,7 @@ export const buildJob = (payload: BuildJobPayload): Job => {
     return pipelineRunnerStore.actions.setResults({
       results: pipelineRunnerStore.actions.runTask({
         ...payload,
-        output: output({ payload }),
+        output: output(payload),
       }),
       ...resultTemplate,
     });

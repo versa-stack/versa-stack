@@ -1,8 +1,9 @@
 import { VersaToolbox } from "@versa-stack/types";
 import { VersaPipelineToolbox } from "@versa-stack/versa-pipeline";
 import bunyan from "bunyan";
+import bformat from "bunyan-format";
 import { GluegunToolbox } from "gluegun";
-import { LoggerRunConfig, VersaLoggingToolbox } from "../model";
+import { VersaLoggingToolbox } from "../model";
 import { waitFor } from "./logging-extension";
 
 const defaultLoggerOptions: bunyan.LoggerOptions = {
@@ -20,9 +21,16 @@ export default async (
     return;
   }
   const { configs } = await toolbox.versa.config;
-  const { runconfig } = configs as { runconfig?: LoggerRunConfig };
+  const { runconfig } = configs;
+  const formatStream = bformat({
+    outputMode: runconfig?.outputMode ?? "simple",
+    color: true,
+    levelInString: true,
+  });
 
-  toolbox.versa.log = bunyan.createLogger(
-    runconfig?.loggerOptions ?? defaultLoggerOptions
-  );
+  toolbox.versa.log = bunyan.createLogger({
+    ...defaultLoggerOptions,
+    stream: formatStream,
+    ...(runconfig?.loggerOptions ?? {}),
+  });
 };

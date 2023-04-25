@@ -17,8 +17,6 @@ export const runInShell: TaskRunHandler = async (payload: RunTaskPayload) => {
           : {}),
       });
 
-      !output.write && console.log('no write found', output)
-
       if (taskProcess.stdout && output != process.stdout) {
         taskProcess.stdout.on("data", (d) => output.write(d));
       }

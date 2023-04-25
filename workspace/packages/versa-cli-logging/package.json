@@ -22,10 +22,12 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@types/bunyan-format": "^0.2.5",
     "@types/through2": "^2.0.38",
-    "@versa-stack/versa-config": "workspace:^",
     "@versa-stack/types": "workspace:^",
+    "@versa-stack/versa-config": "workspace:^",
     "@versa-stack/versa-pipeline": "workspace:^",
+    "bunyan-format": "^0.2.1",
     "gluegun": "^5.1.2",
     "terminal-kit": "^3.0.0",
     "through2": "^4.0.2"

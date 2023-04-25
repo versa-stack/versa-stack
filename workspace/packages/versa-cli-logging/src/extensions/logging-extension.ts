@@ -42,16 +42,15 @@ export default async (toolbox: Toolbox) => {
   await waitForDependencies(toolbox);
 
   if (toolbox?.versa?.pipeline) {
-    toolbox.versa.pipeline.output = (task) => {
+    toolbox.versa.pipeline.output = (payload) => {
+      const { task } = payload;
       const path = Buffer.from(
         `${task.pipeline}:${task.stage}:${task.name}`,
         "utf-8"
       ).toString("base64");
 
       if (!writables[path]) {
-        writables[path] = taskRunnerLogStream(toolbox)({
-          task
-        });
+        writables[path] = taskRunnerLogStream(toolbox)(payload);
       }
 
       return writables[path];
@@ -61,42 +60,49 @@ export default async (toolbox: Toolbox) => {
   toolbox.versa.pipeline?.hooks.addHooks({
     addPipeline: async (payload: Pipeline) => {
       toolbox.versa.log.info({
+        msg: `added pipeline "${payload.name}"`,
         action: "appPipeline",
         payload,
       });
     },
     addJob: async (payload: AddJobPayload) => {
       toolbox.versa.log.info({
+        msg: `added job ${payload.path} to pipeline "${payload.pipeline}"`,
         action: "addJob",
         payload,
       });
     },
     setResults: async (payload: SetResultPayload) => {
       toolbox.versa.log.info({
+        msg: `results from job "${payload.path}" in pipeline "${payload.pipeline}"`,
         action: "setResults",
         payload,
       });
     },
     runPipeline: async (payload: RunPipelinePayload) => {
       toolbox.versa.log.info({
+        msg: `running pipeline "${payload.pipelineName}"`,
         action: "runPipeline",
         payload,
       });
     },
     runPipelineDone: async (payload: any) => {
       toolbox.versa.log.info({
+        msg: `done running pipeline "${payload.pipeline.name}"`,
         action: "runPipelineDone",
         payload,
       });
     },
     runTask: async (payload: RunTaskPayload) => {
       toolbox.versa.log.info({
+        msg: `running task "${payload.task.name}" in stage "${payload.task.name}" for pipeline "${payload.task.pipeline}"`,
         action: "runTask",
         payload,
       });
     },
     runTaskDone: async (payload: any) => {
       toolbox.versa.log.info({
+        msg: `done running task "${payload.task.name}" in stage "${payload.task.stage}" for pipeline "${payload.task.pipeline}"`,
         action: "runTaskDone",
         payload,
       });
