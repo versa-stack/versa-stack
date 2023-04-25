@@ -8,6 +8,10 @@ const validator = new Ajv().compile(schema);
 
 export default (document: Pipeline) => {
   if (!validator(document)) {
-    throw new PipelineInvalidError(document, validator.errors as DefinedError[]);
+    throw new PipelineInvalidError(
+      document,
+      validator.errors as DefinedError[]
+    );
   }
+  return true;
 };

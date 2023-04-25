@@ -1,7 +1,11 @@
 import {
-  AddJobPayload, Job, Pipeline, RunPipelinePayload,
+  AddJobPayload,
+  Job,
+  Pipeline,
+  RunPipelinePayload,
   RunTaskPayload,
-  SetResultPayload, TaskRunHandlerResult
+  SetResultPayload,
+  TaskRunHandlerResult,
 } from "../model";
 import { createStore } from "./store";
 
@@ -28,7 +32,10 @@ export const pipelineRunnerStore = createStore(
 
       return (state.results[pipeline][path] = results);
     },
-    runPipeline: async (_, { pipelineName, output }: RunPipelinePayload) => {
+    runPipeline: async (
+      _,
+      { pipelineName, output, filters }: RunPipelinePayload
+    ) => {
       const pipeline: Pipeline =
         pipelineRunnerStore.getters.pipeline(pipelineName);
 
@@ -41,13 +48,17 @@ export const pipelineRunnerStore = createStore(
       const stagesToBuild = pipeline.order.filter((s) =>
         definedStages.includes(s)
       );
+
       for (const stageName of stagesToBuild) {
         promises.push(
-          pipelineRunnerStore.getters.job(pipelineName, `${stageName}`)(output)
+          pipelineRunnerStore.getters.job(pipelineName, `${stageName}`)(
+            output,
+            filters
+          )
         );
       }
 
-      return Promise.all(promises).then((results) => {
+      return Promise.all(promises.flat()).then((results) => {
         pipelineRunnerStore.hooks.callHook("runPipelineDone", {
           pipeline,
           results,

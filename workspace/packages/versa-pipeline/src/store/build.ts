@@ -1,10 +1,14 @@
+import registryTaskRunFilterHandler from "src/taskRunFilter";
 import {
+  AddJobPayload,
   BuildJobPayload,
   BuildPipelinePayload,
   Job,
   RunTaskPayload,
+  TaskRunFilterRegistry,
   TaskRunHandlerResult,
-  VersaOutputFactory,
+  TaskRunResult,
+  TaskRunResultCodeEnum,
 } from "../model";
 import { waitForDependencies } from "../run";
 import { pipelineRunnerStore } from "./runner";
@@ -39,13 +43,13 @@ export const buildPipeline = (payload: BuildPipelinePayload) => {
     pipelineRunnerStore.actions.addJob({
       pipeline: payload.pipeline.name,
       path: stage,
-      job: (output: VersaOutputFactory): TaskRunHandlerResult => {
+      job: (output, filters) => {
         const stagePromises: TaskRunHandlerResult[] = [];
         for (const job of pipelineRunnerStore.getters.jobsByStage(
           payload.pipeline.name,
           stage
         ) as Job[]) {
-          stagePromises.push(job(output));
+          stagePromises.push(job(output, filters));
         }
         return pipelineRunnerStore.actions.setResults({
           results: Promise.all(stagePromises).then((r) => r.flat()),
@@ -53,7 +57,7 @@ export const buildPipeline = (payload: BuildPipelinePayload) => {
           path: stage,
         });
       },
-    });
+    } as AddJobPayload);
 
     loopVars.stage = stage;
   }
@@ -72,28 +76,71 @@ export const buildJob = (payload: BuildJobPayload): Job => {
 
   const resultTemplate = {
     pipeline: payload.task.pipeline,
-    path: `${payload.task.stage}:${payload.task.name}`,
+    path: `${payload.task.stage}:${payload.task.name}`
   };
 
   if (taskDependencies.length) {
-    return async (output: VersaOutputFactory) =>
-      pipelineRunnerStore.actions.setResults({
+    return async (output, filters) => {
+      const runPayload = {
+        ...payload,
+        output: output({ payload }),
+      };
+
+      const filterTaskResult = applyFilters(runPayload, filters);
+      if (!!filterTaskResult) {
+        return pipelineRunnerStore.actions.setResults({
+          results: Promise.resolve([filterTaskResult]),
+          ...resultTemplate,
+        });
+      }
+
+      return pipelineRunnerStore.actions.setResults({
         results: waitForDependencies(payload, taskDependencies).then((r) =>
-          pipelineRunnerStore.actions.runTask({
-            ...payload,
-            output: output({ payload }),
-          } as RunTaskPayload)
+          pipelineRunnerStore.actions.runTask(runPayload)
         ),
         ...resultTemplate,
       });
+    };
   }
 
-  return async (output: VersaOutputFactory) =>
-    pipelineRunnerStore.actions.setResults({
+  return async (output, filters) => {
+    const runPayload = {
+      ...payload,
+      output: output({ payload }),
+    };
+
+    const filterTaskResult = applyFilters(runPayload, filters);
+    if (!!filterTaskResult) {
+      return pipelineRunnerStore.actions.setResults({
+        results: Promise.resolve([filterTaskResult]),
+        ...resultTemplate,
+      });
+    }
+
+    return pipelineRunnerStore.actions.setResults({
       results: pipelineRunnerStore.actions.runTask({
         ...payload,
         output: output({ payload }),
       }),
       ...resultTemplate,
     });
+  };
+};
+
+const applyFilters = (
+  payload: RunTaskPayload,
+  filters: TaskRunFilterRegistry
+): TaskRunResult | false => {
+  const filterResult = registryTaskRunFilterHandler(filters)(payload);
+  return filterResult.skip
+    ? ({
+        task: payload.task,
+        status: {
+          code: TaskRunResultCodeEnum.SKIPPED,
+          msg: filterResult.msg,
+        },
+        pipeline: payload.task.pipeline,
+        path: `${payload.task.stage}:${payload.task.name}`,
+      } as TaskRunResult)
+    : false;
 };

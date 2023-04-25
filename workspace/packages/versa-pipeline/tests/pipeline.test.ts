@@ -1,5 +1,8 @@
 import pipeline, {
   Pipeline,
+  TaskRunResult,
+  TaskRunResultCodeEnum,
+  defaultFilterRegistry,
   defaultRegistry,
   pipelineRunnerStore,
 } from "../src";
@@ -24,7 +27,7 @@ describe("Runs pipelines in parallel for a given glob.", () => {
           );
           expect(jobs).not.toBeNull();
           if (!jobs) continue;
-          expect(jobs.length).toEqual(1);
+          expect(jobs.length).toEqual(stage === "third" ? 2 : 1);
         }
       }
     );
@@ -41,7 +44,10 @@ describe("Runs pipelines in parallel for a given glob.", () => {
 
     return pipeline(
       [`${__dirname}/files/dynamic-pipeline.yaml`],
-      defaultRegistry,
+      {
+        handler: defaultRegistry,
+        filters: defaultFilterRegistry,
+      },
       configs
     ).then(() => {
       const actualPipeline = pipelineRunnerStore.getters.pipeline(
@@ -79,9 +85,14 @@ describe("Runs pipelines in parallel for a given glob.", () => {
       .runPipeline({
         pipelineName: "pipeline-simple",
         output: () => process.stdout,
+        filters: defaultFilterRegistry,
       })
+
       .then((pipelineResults) => {
-        expect(pipelineResults.length).toEqual(3);
+        expect(pipelineResults.length).toEqual(4);
+        expect((pipelineResults[3] as TaskRunResult).status.code).toEqual(
+          TaskRunResultCodeEnum.SKIPPED as number
+        );
         return pipelineResults;
       });
   }, 120000);

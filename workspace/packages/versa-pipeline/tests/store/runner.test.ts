@@ -1,5 +1,6 @@
 import { AddJobPayload, pipelineRunnerStore } from "../../src";
 import { Job, Pipeline } from "../../src/model";
+import { defaultFilterRegistry } from "../../src/pipeline";
 
 const addTestPipeline = () => {
   const pipeline: Pipeline = {
@@ -44,17 +45,17 @@ describe("pipelineRunnerStore", () => {
     const payloads: AddJobPayload[] = [
       {
         path: "stage1:job1",
-        job: ((o) => {}) as Job,
+        job: ((o, defaultFilterRegistry) => {}) as Job,
         pipeline: "pipeline",
       },
       {
         path: "stage1:job2",
-        job: ((o) => {}) as Job,
+        job: ((o, defaultFilterRegistry) => {}) as Job,
         pipeline: "pipeline",
       },
       {
         path: "stage2:job1",
-        job: ((o) => {}) as Job,
+        job: ((o, defaultFilterRegistry) => {}) as Job,
         pipeline: "pipeline",
       },
     ];

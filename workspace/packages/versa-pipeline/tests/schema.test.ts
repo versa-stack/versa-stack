@@ -1,6 +1,7 @@
 import { Pipeline } from "../src";
 import { PipelineInvalidError } from "../src";
 import schema from "../src/schema";
+import { Task, WhenTask } from "../src/model";
 
 describe("validatePipeline", () => {
   const validPipeline = {
@@ -37,5 +38,16 @@ describe("validatePipeline", () => {
         expect.stringContaining("Pipeline is invalid:")
       );
     }
+  });
+
+  test("should allow additional task properties", () => {
+    (validPipeline.stages["one"][0] as Task & WhenTask).when =
+      "something == something_else";
+
+    const result = schema.validate(validPipeline as unknown as Pipeline);
+    expect((validPipeline.stages["one"][0] as Task & WhenTask).when).toEqual(
+      "something == something_else"
+    );
+    expect(result).toBe(true);
   });
 });

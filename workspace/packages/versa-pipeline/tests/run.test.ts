@@ -1,5 +1,10 @@
 import { PassThrough } from "stream";
-import { RunTaskPayload, Task, pipelineRunnerStore } from "../src";
+import {
+  RunTaskPayload,
+  Task,
+  defaultFilterRegistry,
+  pipelineRunnerStore,
+} from "../src";
 import { runPipeline, runTask, waitForDependencies } from "../src/run";
 
 describe("runPipeline", () => {
@@ -13,6 +18,7 @@ describe("runPipeline", () => {
     const result = await runPipeline({
       pipelineName,
       output: () => new PassThrough(),
+      filters: defaultFilterRegistry,
     });
     expect(result).toEqual([]);
   });
@@ -24,8 +30,8 @@ describe("runPipeline", () => {
       order: ["stage1", "stage2"],
       stages: {
         stage1: [{}],
-        stage2: [{}]
-      }
+        stage2: [{}],
+      },
     });
     pipelineRunnerStore.getters.job = jest
       .fn()
@@ -39,6 +45,7 @@ describe("runPipeline", () => {
     const result = await runPipeline({
       pipelineName,
       output: () => new PassThrough(),
+      filters: defaultFilterRegistry,
     });
     expect(result).toEqual([
       { stage: "stage1", result: "success" },

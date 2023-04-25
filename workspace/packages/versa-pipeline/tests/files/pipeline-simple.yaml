@@ -19,3 +19,7 @@ stages:
         - first:job1
       scripts:
         - echo "job3"
+    - name: job4
+      when: foo == bar
+      scripts:
+        - echo "job4"

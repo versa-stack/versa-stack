@@ -6,7 +6,7 @@ import {
 } from "../model";
 import { runInDocker } from "./runInDocker";
 import { runInShell } from "./runInShell";
-import { whenHandler } from "./whenHandler";
+import { whenFilter } from "../taskRunFilter/whenFilter";
 
 const registryTaskRunHandler =
   (r: TaskRunHandlerRegistry): TaskRunHandler =>
@@ -29,4 +29,4 @@ const registryTaskRunHandler =
 
 export default registryTaskRunHandler;
 
-export { runInDocker, runInShell, whenHandler };
+export { runInDocker, runInShell, whenFilter as whenHandler };

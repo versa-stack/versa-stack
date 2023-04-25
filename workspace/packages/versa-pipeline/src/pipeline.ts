@@ -1,23 +1,21 @@
 import { fetchMergeExpand } from "@versa-stack/versa-config";
 import globby from "globby";
 import {
+  BuildPipelinePayload,
   DockerTask,
   Pipeline,
   Task,
+  TaskRunFilterRegistry,
   TaskRunHandlerRegistry,
   TaskRunHandlerResult,
   VersaOutputFactory,
-  WhenTask,
 } from "./model";
 import { runPipeline } from "./run";
 import schema from "./schema";
 import { buildPipeline } from "./store/build";
 import { pipelineRunnerStore } from "./store/runner";
-import taskRunHandler, {
-  runInDocker,
-  runInShell,
-  whenHandler,
-} from "./taskRunHandler";
+import { whenFilter } from "./taskRunFilter/whenFilter";
+import taskRunHandler, { runInDocker, runInShell } from "./taskRunHandler";
 
 export const defaultRegistry: TaskRunHandlerRegistry = {
   runInShell: (t: Task & DockerTask) => ({
@@ -28,15 +26,21 @@ export const defaultRegistry: TaskRunHandlerRegistry = {
     weight: !!t.scripts && !!t.image ? 10 : 0,
     handler: runInDocker,
   }),
-  whenHandler: (t: Task & WhenTask) => ({
-    weight: !!t.when ? 1000 : 0,
-    handler: whenHandler,
-  }),
+};
+
+export const defaultFilterRegistry = {
+  whenFilter,
 };
 
 export default async <C extends Record<string, any> = Record<string, any>>(
   glob: string[],
-  registry: TaskRunHandlerRegistry = defaultRegistry,
+  registries: {
+    handler: TaskRunHandlerRegistry;
+    filters: TaskRunFilterRegistry;
+  } = {
+    handler: defaultRegistry,
+    filters: defaultFilterRegistry,
+  },
   configs = {} as C
 ) => {
   const resolvedSources = await resolveGlob(glob);
@@ -58,7 +62,7 @@ export default async <C extends Record<string, any> = Record<string, any>>(
 
     buildPipeline({
       pipeline,
-      handler: taskRunHandler(registry),
+      handler: taskRunHandler(registries.handler),
     });
   }
 
@@ -68,13 +72,21 @@ export default async <C extends Record<string, any> = Record<string, any>>(
       if (!sequential) {
         const promises: TaskRunHandlerResult[] = [];
         for (const pipelineName in pipelineRunnerStore.state.pipelines) {
-          promises.push(runPipeline({ pipelineName, output }));
+          promises.push(
+            runPipeline({ pipelineName, output, filters: registries.filters })
+          );
         }
         return Promise.all(promises).then((r) => r.flat());
       }
       const results = [];
       for (const pipelineName in pipelineRunnerStore.state.pipelines) {
-        results.push(await runPipeline({ pipelineName, output }));
+        results.push(
+          await runPipeline({
+            pipelineName,
+            output,
+            filters: registries.filters,
+          })
+        );
       }
       return results.flat();
     },

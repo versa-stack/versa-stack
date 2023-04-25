@@ -25,10 +25,17 @@ export type TaskRunHandlerRegistry = Record<
   (t: Task) => TaskRunHandlerVote
 >;
 
+export type TaskRunFilterRegistry = Record<string, TaskRunFilter>;
+
 export type AddJobPayload = {
   job: Job;
   pipeline: string;
   path: string;
+};
+
+export type AddPipelinePayload = {
+  pipeline: Pipeline;
+  filters: TaskRunFilterRegistry;
 };
 
 export type SetResultPayload = {
@@ -40,6 +47,7 @@ export type SetResultPayload = {
 export type RunPipelinePayload = {
   pipelineName: string;
   output: VersaOutputFactory;
+  filters: TaskRunFilterRegistry;
 };
 
 export type RunTaskPayload<T extends Task = Task> = {
@@ -87,6 +95,7 @@ export type WhenTask = {
 };
 
 export enum TaskRunResultCodeEnum {
+  EOC = -2,
   SUCCESS = -1,
   SKIPPED = 85,
 }
@@ -105,4 +114,16 @@ export type TaskRunHandler<T extends Task = Task> = (
   main?: TaskRunHandler<T>
 ) => TaskRunHandlerResult;
 
-export type Job = (output: VersaOutputFactory) => TaskRunHandlerResult;
+export type TaskRunFilter<T extends Task = Task> = (
+  payload: T
+) => TaskRunFilterResult;
+
+export type TaskRunFilterResult = {
+  skip: boolean;
+  msg?: string;
+};
+
+export type Job = (
+  output: VersaOutputFactory,
+  filters: TaskRunFilterRegistry
+) => TaskRunHandlerResult;
