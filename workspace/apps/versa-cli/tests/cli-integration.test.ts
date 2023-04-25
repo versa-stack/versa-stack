@@ -1,4 +1,4 @@
-import { system, filesystem } from "gluegun";
+import { filesystem, system } from "gluegun";
 
 const src = filesystem.path(__dirname, "..");
 

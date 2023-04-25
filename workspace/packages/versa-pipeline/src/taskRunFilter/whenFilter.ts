@@ -6,7 +6,7 @@ const filterResult = (skip: boolean, when?: string) =>
     msg: skip ? `skipped because "${when ?? ""}" was truhty` : "",
   } as TaskRunFilterResult);
 
-export const whenFilter: TaskRunFilter<WhenTask & Task> = (task) => {
+export const whenFilter: TaskRunFilter<WhenTask & Task> = ({ task }) => {
   const matches = /([^==|!=]+)(!=|==)(.*)/.exec(task.when as string);
 
   if (task.when === undefined) {

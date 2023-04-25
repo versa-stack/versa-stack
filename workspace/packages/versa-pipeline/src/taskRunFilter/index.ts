@@ -11,7 +11,7 @@ const registryTaskRunFilterHandler =
         if (previous.skip) {
           return previous;
         }
-        return current(payload.task);
+        return current(payload);
       },
       { skip: false }
     ) as unknown as TaskRunFilterResult;

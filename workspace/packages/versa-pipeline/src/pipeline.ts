@@ -16,6 +16,7 @@ import { buildPipeline } from "./store/build";
 import { pipelineRunnerStore } from "./store/runner";
 import { whenFilter } from "./taskRunFilter/whenFilter";
 import taskRunHandler, { runInDocker, runInShell } from "./taskRunHandler";
+import { tagFilter } from './taskRunFilter/tagFilter';
 
 export const defaultRegistry: TaskRunHandlerRegistry = {
   runInShell: (t: Task & DockerTask) => ({
@@ -30,6 +31,7 @@ export const defaultRegistry: TaskRunHandlerRegistry = {
 
 export const defaultFilterRegistry = {
   whenFilter,
+  tagFilter
 };
 
 export default async <C extends Record<string, any> = Record<string, any>>(

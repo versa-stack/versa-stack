@@ -1,11 +1,10 @@
 import { GluegunCommand } from "gluegun";
 
-const command: GluegunCommand = {
+export default {
   name: "versa",
+  hidden: true,
   run: async (toolbox) => {
     const { print } = toolbox;
     print.printHelp(toolbox);
   },
-};
-
-module.exports = command;
+} as GluegunCommand;

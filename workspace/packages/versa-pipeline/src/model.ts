@@ -54,6 +54,7 @@ export type RunTaskPayload<T extends Task = Task> = {
   task: T;
   handler: TaskRunHandler<T>;
   output: ReturnType<VersaOutputFactory>;
+  options?: Record<string, any>;
 };
 
 export type BuildJobPayload<T extends Task = Task> = {
@@ -94,6 +95,10 @@ export type WhenTask = {
   when?: string;
 };
 
+export type TaggedTask = {
+  tags?: string[];
+};
+
 export enum TaskRunResultCodeEnum {
   EOC = -2,
   SUCCESS = -1,
@@ -115,7 +120,7 @@ export type TaskRunHandler<T extends Task = Task> = (
 ) => TaskRunHandlerResult;
 
 export type TaskRunFilter<T extends Task = Task> = (
-  payload: T
+  payload: RunTaskPayload<T>
 ) => TaskRunFilterResult;
 
 export type TaskRunFilterResult = {

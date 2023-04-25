@@ -1,4 +1,4 @@
-import registryTaskRunFilterHandler from "src/taskRunFilter";
+import registryTaskRunFilterHandler from "../taskRunFilter";
 import {
   AddJobPayload,
   BuildJobPayload,
@@ -76,7 +76,7 @@ export const buildJob = (payload: BuildJobPayload): Job => {
 
   const resultTemplate = {
     pipeline: payload.task.pipeline,
-    path: `${payload.task.stage}:${payload.task.name}`
+    path: `${payload.task.stage}:${payload.task.name}`,
   };
 
   if (taskDependencies.length) {

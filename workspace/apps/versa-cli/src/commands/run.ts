@@ -1,6 +1,7 @@
 import { VersaConfig, VersaToolbox } from "@versa-stack/types";
 import createPipeline, {
   VersaPipelineToolbox,
+  defaultFilterRegistry,
   defaultRegistry,
 } from "@versa-stack/versa-pipeline";
 import { GluegunToolbox } from "gluegun";
@@ -39,8 +40,13 @@ export default {
     const runner = await createPipeline(
       typeof glob === "string" ? [glob] : glob,
       {
-        ...defaultRegistry,
-        ...additionalHandlers,
+        handler: {
+          ...defaultRegistry,
+          ...additionalHandlers,
+        },
+        filters: {
+          ...defaultFilterRegistry,
+        },
       },
       configs
     );

@@ -24,7 +24,8 @@
     "dockerode": "^3.3.5",
     "execa": "npm:@esm2cjs/execa@6.1.1-cjs.1",
     "globby": "^11.1.0",
-    "hookable": "^5.5.3"
+    "hookable": "^5.5.3",
+    "logical-expression-parser": "^1.0.2"
   },
   "peerDependencies": {
     "@versa-stack/versa-config": "workspace:*"

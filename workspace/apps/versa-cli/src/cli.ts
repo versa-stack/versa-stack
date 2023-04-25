@@ -1,5 +1,6 @@
 import { build } from "gluegun";
 import { Options } from "gluegun/build/types/domain/options";
+import versaCommand from "./commands/versa";
 
 /**
  * Create the cli and kick it off
@@ -13,6 +14,7 @@ export const run = async (argv: string | Options) => {
       matching: "versa-cli-*",
       hidden: true,
     })
+    .defaultCommand(versaCommand)
     .help() // provides default for help, h, --help, -h
     .version() // provides default for version, v, --version, -v
     .create();
