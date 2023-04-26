@@ -31,6 +31,7 @@ export const buildPipeline = (payload: BuildPipelinePayload) => {
         task,
         handler: payload.handler,
         dependsOn: loopVars.stage,
+        options: payload.options,
       });
 
       pipelineRunnerStore.actions.addJob({
@@ -69,7 +70,6 @@ export const buildJob = (payload: BuildJobPayload): Job => {
   const taskDependencies: string[] = payload.task.depends
     ? payload.task.depends
     : [];
-
   if (payload.dependsOn && !taskDependencies.length) {
     taskDependencies.push(`${payload.dependsOn}`);
   }

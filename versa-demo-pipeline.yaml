@@ -2,16 +2,28 @@ name: versa
 
 order:
   - test
+  - build
+  - deploy
 
 stages:
   test:
-    - name: hello world
+    - name: test-task
       image: alpine
       scripts:
         - echo "hello world"
         - sleep 3
         - echo "hello world again"
-    - name: number two
+      tags:
+        - always
+  build:
+    - name: build-task
       image: alpine
       scripts:
-        - echo "another task run in parallel."
+        - echo "build task"
+  deploy:
+    - name: deploy-task
+      image: alpine
+      scripts:
+        - echo "demo-tag"
+      tags:
+        - demo-tag

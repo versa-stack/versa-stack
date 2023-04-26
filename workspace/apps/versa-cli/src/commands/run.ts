@@ -5,6 +5,7 @@ import createPipeline, {
   defaultRegistry,
 } from "@versa-stack/versa-pipeline";
 import { GluegunToolbox } from "gluegun";
+import { Toolbox } from "gluegun/build/types/domain/toolbox";
 import { waitFor } from "../utilities";
 
 export default {
@@ -12,11 +13,11 @@ export default {
   description: "runs pipeline by their glob",
   alias: "r",
   run: async (
-    toolbox: GluegunToolbox & VersaPipelineToolbox & VersaToolbox
+    toolbox: GluegunToolbox & VersaPipelineToolbox & VersaToolbox & Toolbox
   ) => {
     const { versa } = toolbox;
     const { options } = toolbox.parameters;
-    const { p, pipeline } = toolbox.parameters.options;
+    const { p, pipeline, t, tags, s, sequential } = options;
     const { configs } = (await versa?.config) || { configs: {} as VersaConfig };
 
     await waitFor(() => versa.pipeline, {
@@ -36,6 +37,10 @@ export default {
 
     const additionalHandlers = versa?.pipeline.handlers ?? {};
     const glob = p ?? pipeline ?? configs.runconfig.pipeline;
+    const pipelineOptions = {
+      sequential: s || sequential,
+      tagsExpr: t || tags,
+    };
 
     const runner = await createPipeline(
       typeof glob === "string" ? [glob] : glob,
@@ -48,15 +53,14 @@ export default {
           ...defaultFilterRegistry,
         },
       },
-      configs
+      configs,
+      pipelineOptions
     );
 
     if (!runner) {
       return;
     }
 
-    await runner
-      .run(versa.pipeline.output, options.s || options.sequential)
-      .then(() => {});
+    await runner.run(versa.pipeline.output, pipelineOptions);
   },
 };

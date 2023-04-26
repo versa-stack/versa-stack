@@ -3,14 +3,14 @@ import { TaggedTask, Task, TaskRunFilter, TaskRunFilterResult } from "../model";
 
 export const tagFilter: TaskRunFilter<Task & TaggedTask> = (payload) => {
   const { tags } = payload.task;
-  const tagsExpr = payload.options?.tags;
+  const { tagsExpr } = payload.options;
   if (!tagsExpr) {
     return { skip: false };
   }
 
   return filterResult(
-    !LEP.parse(`(${tagsExpr}|always)`, (t) => (tags ?? ["always"]).includes(t)),
-    tags ?? ["always"],
+    !LEP.parse(`always|(${tagsExpr})`, (t) => (tags ?? []).includes(t)),
+    tags ?? [],
     tagsExpr
   );
 };

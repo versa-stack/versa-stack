@@ -485,6 +485,11 @@ mark.js@8.11.1:
   resolved "https://registry.yarnpkg.com/mark.js/-/mark.js-8.11.1.tgz#180f1f9ebef8b0e638e4166ad52db879beb2ffc5"
   integrity sha512-1I+1qpDt4idfgLQG+BNWmrqku+7/2bi5nLf4YwF8y8zXvmfiTBY3PV3ZibfrjBueCByROpuBjLLFCajqkgYoLQ==
 
+markdown-it-import@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/markdown-it-import/-/markdown-it-import-0.2.0.tgz#4769e3b6a679335ebe2e833d53c4dd5d2e251d95"
+  integrity sha512-VozFLF94LfbnK8Pn9701alhfVGdDaBnR5ap2W14GL7LvOnpLnIrpn26Ov+bqgazbcnGRiZavpg8P/UZQKNtZRA==
+
 minisearch@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/minisearch/-/minisearch-6.0.1.tgz#55e40135e7e6be60f1c1c2f5ee890c334e179a86"

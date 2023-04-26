@@ -3,6 +3,7 @@ import {
   RunTaskPayload,
   Task,
   defaultFilterRegistry,
+  defaultRunOptions,
   pipelineRunnerStore,
 } from "../src";
 import { runPipeline, runTask, waitForDependencies } from "../src/run";
@@ -61,6 +62,7 @@ describe("runTask", () => {
         name: "testTask",
         pipeline: "testPipeline",
       } as Task,
+      options: defaultRunOptions,
       output: new PassThrough(),
       handler: jest.fn((task) =>
         Promise.resolve([
@@ -75,7 +77,7 @@ describe("runTask", () => {
     };
     const result = await runTask(payload);
     expect(payload.handler).toHaveBeenCalledWith(payload);
-    expect(result);
+    expect(result.length).toEqual(1);
   });
 });
 

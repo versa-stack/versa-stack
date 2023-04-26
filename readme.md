@@ -1,4 +1,4 @@
-# Welcome to the versa-stack Github Project!
+# Welcome to versa-stack
 
 versa-stack is a project aimed at providing simple, configurable tools for developing, building, and deploying arbitrary applications. The stack includes a command-line interface (CLI) and a Kubernetes operator that can be used to plan and execute pipelines, run them on localhost, Docker containers, or Kubernetes clusters, and extend their functionality with plugins.
 

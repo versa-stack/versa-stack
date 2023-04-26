@@ -1,9 +1,9 @@
 import { fetchMergeExpand } from "@versa-stack/versa-config";
 import globby from "globby";
 import {
-  BuildPipelinePayload,
   DockerTask,
   Pipeline,
+  RunTaskPayloadOptions,
   Task,
   TaskRunFilterRegistry,
   TaskRunHandlerRegistry,
@@ -14,9 +14,9 @@ import { runPipeline } from "./run";
 import schema from "./schema";
 import { buildPipeline } from "./store/build";
 import { pipelineRunnerStore } from "./store/runner";
+import { tagFilter } from "./taskRunFilter/tagFilter";
 import { whenFilter } from "./taskRunFilter/whenFilter";
 import taskRunHandler, { runInDocker, runInShell } from "./taskRunHandler";
-import { tagFilter } from './taskRunFilter/tagFilter';
 
 export const defaultRegistry: TaskRunHandlerRegistry = {
   runInShell: (t: Task & DockerTask) => ({
@@ -31,7 +31,7 @@ export const defaultRegistry: TaskRunHandlerRegistry = {
 
 export const defaultFilterRegistry = {
   whenFilter,
-  tagFilter
+  tagFilter,
 };
 
 export default async <C extends Record<string, any> = Record<string, any>>(
@@ -43,7 +43,8 @@ export default async <C extends Record<string, any> = Record<string, any>>(
     handler: defaultRegistry,
     filters: defaultFilterRegistry,
   },
-  configs = {} as C
+  configs = {} as C,
+  options: RunTaskPayloadOptions = defaultRunOptions
 ) => {
   const resolvedSources = await resolveGlob(glob);
 
@@ -65,34 +66,62 @@ export default async <C extends Record<string, any> = Record<string, any>>(
     buildPipeline({
       pipeline,
       handler: taskRunHandler(registries.handler),
+      options,
     });
   }
 
   return {
     runPipeline,
-    run: async (output: VersaOutputFactory, sequential: boolean = false) => {
-      if (!sequential) {
-        const promises: TaskRunHandlerResult[] = [];
-        for (const pipelineName in pipelineRunnerStore.state.pipelines) {
-          promises.push(
-            runPipeline({ pipelineName, output, filters: registries.filters })
-          );
-        }
-        return Promise.all(promises).then((r) => r.flat());
-      }
-      const results = [];
-      for (const pipelineName in pipelineRunnerStore.state.pipelines) {
-        results.push(
-          await runPipeline({
-            pipelineName,
-            output,
-            filters: registries.filters,
-          })
-        );
-      }
-      return results.flat();
-    },
+    run: async (
+      output: VersaOutputFactory,
+      options: RunTaskPayloadOptions = defaultRunOptions
+    ) =>
+      options.sequential
+        ? await runSync(output, registries.filters, options)
+        : runAsync(output, registries.filters, options),
   };
+};
+
+const runAsync = async (
+  output: VersaOutputFactory,
+  filters: TaskRunFilterRegistry,
+  options: RunTaskPayloadOptions
+) => {
+  const promises: TaskRunHandlerResult[] = [];
+  for (const pipelineName in pipelineRunnerStore.state.pipelines) {
+    promises.push(
+      runPipeline({
+        pipelineName,
+        output,
+        filters,
+        ...options,
+      })
+    );
+  }
+  return Promise.all(promises).then((r) => r.flat());
+};
+
+const runSync = async (
+  output: VersaOutputFactory,
+  filters: TaskRunFilterRegistry,
+  options: RunTaskPayloadOptions
+) => {
+  const results = [];
+  for (const pipelineName in pipelineRunnerStore.state.pipelines) {
+    results.push(
+      await runPipeline({
+        pipelineName,
+        output,
+        filters,
+        ...options,
+      })
+    );
+  }
+  return results.flat();
+};
+
+export const defaultRunOptions = {
+  sequential: false,
 };
 
 const resolveGlob = async (glob: string[] | string) => {

@@ -3,3 +3,4 @@ node_modules
 coverage
 tsconfig.tsbuildinfo
 docs/.vitepress/dist
+docs/.vitepress/cache

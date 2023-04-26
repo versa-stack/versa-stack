@@ -1,10 +1,15 @@
-import { RunPipelinePayload, RunTaskPayload } from "./model";
+import {
+  RunPipelinePayload,
+  RunTaskPayload,
+  TaskRunHandlerResult,
+} from "./model";
 import { pipelineRunnerStore } from "./store";
 
-export const runPipeline = async (payload: RunPipelinePayload) =>
-  pipelineRunnerStore.actions.runPipeline(payload);
+export const runPipeline = async (
+  payload: RunPipelinePayload
+): TaskRunHandlerResult => pipelineRunnerStore.actions.runPipeline(payload);
 
-export const runTask = (payload: RunTaskPayload) =>
+export const runTask = (payload: RunTaskPayload): TaskRunHandlerResult =>
   pipelineRunnerStore.actions.runTask(payload);
 
 export const waitForDependencies = async (

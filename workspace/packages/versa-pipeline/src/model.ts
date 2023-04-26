@@ -8,6 +8,7 @@ export type VersaPipelineToolbox = {
     pipeline?: VersaPipeline;
   };
 };
+
 export type VersaPipeline = {
   store: typeof pipelineRunnerStore.getters;
   hooks: typeof pipelineRunnerStore.hooks;
@@ -54,7 +55,12 @@ export type RunTaskPayload<T extends Task = Task> = {
   task: T;
   handler: TaskRunHandler<T>;
   output: ReturnType<VersaOutputFactory>;
-  options?: Record<string, any>;
+  options: RunTaskPayloadOptions;
+};
+
+export type RunTaskPayloadOptions = {
+  sequential: boolean;
+  tagsExpr?: string;
 };
 
 export type BuildJobPayload<T extends Task = Task> = {
@@ -64,7 +70,7 @@ export type BuildJobPayload<T extends Task = Task> = {
 export type BuildPipelinePayload<T extends Task = Task> = {
   handler: TaskRunHandler<T>;
   pipeline: Pipeline;
-};
+} & Pick<RunTaskPayload, "options">;
 
 export interface Pipeline {
   name: string;
