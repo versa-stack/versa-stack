@@ -2,22 +2,29 @@ import {
   AddJobPayload,
   Job,
   Pipeline,
-  RunPipelinePayload,
-  RunTaskPayload,
   SetResultPayload,
+  Task,
+  TaskRunFilterRecord,
   TaskRunHandlerResult,
+  TaskRunVoterRecord,
 } from "../model";
-import { createStore } from "./store";
+import { createStore } from "../store";
 
-export const pipelineRunnerStore = createStore(
+export const pipelineStore = createStore(
   {
     pipelines: {} as Record<string, Pipeline>,
     results: {} as Record<string, TaskRunHandlerResult>,
     jobs: {} as Record<string, Record<string, Job>>,
+    filters: {} as TaskRunFilterRecord,
+    voters: {} as TaskRunVoterRecord,
   },
   {
+    setFilters: (state, filters: TaskRunFilterRecord) =>
+      (state.filters = filters),
+    setVoters: (state, voters: TaskRunVoterRecord) => (state.voters = voters),
     addPipeline: (state, pipeline: Pipeline) =>
       (state.pipelines[pipeline.name] = fixTasks(pipeline)),
+
     addJob: (state, { job, pipeline, path }: AddJobPayload) => {
       if (!state.jobs[pipeline]) {
         state.jobs[pipeline] = {};
@@ -31,49 +38,6 @@ export const pipelineRunnerStore = createStore(
       }
 
       return (state.results[pipeline][path] = results);
-    },
-    runPipeline: async (
-      _,
-      { pipelineName, output, filters }: RunPipelinePayload
-    ) => {
-      const pipeline: Pipeline =
-        pipelineRunnerStore.getters.pipeline(pipelineName);
-
-      if (!pipeline.stages) {
-        return Promise.resolve([]);
-      }
-
-      const promises: TaskRunHandlerResult[] = [];
-      const definedStages = Object.keys(pipeline.stages);
-      const stagesToBuild = pipeline.order.filter((s) =>
-        definedStages.includes(s)
-      );
-
-      for (const stageName of stagesToBuild) {
-        promises.push(
-          pipelineRunnerStore.getters.job(pipelineName, `${stageName}`)(
-            output,
-            filters
-          )
-        );
-      }
-
-      return Promise.all(promises.flat()).then((results) => {
-        pipelineRunnerStore.hooks.callHook("runPipelineDone", {
-          pipeline,
-          results,
-        });
-        return results.flat();
-      });
-    },
-    runTask: async (_, payload: RunTaskPayload) => {
-      return payload.handler(payload).then((results) => {
-        pipelineRunnerStore.hooks.callHook("runTaskDone", {
-          task: payload.task,
-          results,
-        });
-        return results;
-      });
     },
   },
   {
@@ -94,6 +58,12 @@ export const pipelineRunnerStore = createStore(
         state.results[name] && state.results[name][path]
           ? state.results[name][path]
           : null,
+    taskByPath: (state) => (pipeline: string, path: string) => {
+      const [stage, task] = path.split(":");
+      return (state.pipelines[pipeline].stages[stage] as Task[]).find(
+        (t) => t.name === task
+      );
+    },
     jobsByStage: (state) => (name: string, stage: string) => {
       if (!state.jobs[name]) {
         return [];
@@ -107,6 +77,23 @@ export const pipelineRunnerStore = createStore(
         }
 
         jobs.push(state.jobs[name][path]);
+      }
+
+      return jobs;
+    },
+    jobPathsByStage: (state) => (name: string, stage: string) => {
+      if (!state.jobs[name]) {
+        return [];
+      }
+
+      const jobs: string[] = [];
+
+      for (const path in state.jobs[name]) {
+        if (path.indexOf(stage) !== 0 || path === stage) {
+          continue;
+        }
+
+        jobs.push(path);
       }
 
       return jobs;

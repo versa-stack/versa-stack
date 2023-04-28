@@ -19,11 +19,12 @@
   "author": "kmhusseini@gmail.com",
   "license": "MIT",
   "dependencies": {
+    "@amaabca/sensitive-param-filter": "^1.2.7",
     "ajv": "^8.12.0",
     "deepmerge": "^4.3.1",
     "dockerode": "^3.3.5",
     "execa": "npm:@esm2cjs/execa@6.1.1-cjs.1",
-    "globby": "^11.1.0",
+    "glob": "^10.2.2",
     "hookable": "^5.5.3",
     "logical-expression-parser": "^1.0.2"
   },
@@ -32,9 +33,11 @@
   },
   "devDependencies": {
     "@types/dockerode": "^3.3.16",
+    "@types/glob": "^8.1.0",
     "@types/jest": "^29.5.0",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.15.11",
+    "@types/node": "^18.16.1",
+    "@versa-stack/types": "workspace:*",
     "@versa-stack/versa-config": "workspace:*",
     "jest": "^29.5.0",
     "nodemon": "^2.0.22",

@@ -1,8 +1,11 @@
 import { VersaConfig, VersaToolbox } from "@versa-stack/types";
-import createPipeline, {
+import {
+  RunPipelineOptions,
   VersaPipelineToolbox,
-  defaultFilterRegistry,
-  defaultRegistry,
+  createPipeline,
+  defaultTaskRunFilterRecord,
+  defaultTaskRunVoterRecord,
+  pipelineStore,
 } from "@versa-stack/versa-pipeline";
 import { GluegunToolbox } from "gluegun";
 import { Toolbox } from "gluegun/build/types/domain/toolbox";
@@ -21,7 +24,7 @@ export default {
     const { configs } = (await versa?.config) || { configs: {} as VersaConfig };
 
     await waitFor(() => versa.pipeline, {
-      maxWaitSeconds: 5,
+      maxWaitSeconds: 60,
       waitMs: 10,
     });
 
@@ -35,32 +38,45 @@ export default {
       };
     }
 
-    const additionalHandlers = versa?.pipeline.handlers ?? {};
-    const glob = p ?? pipeline ?? configs.runconfig.pipeline;
+    const additionalVoters = versa?.pipeline.voters ?? {};
+    const additionalFilters = versa?.pipeline.filters ?? {};
+    const glob: string | string[] = (
+      p ??
+      pipeline ??
+      configs.runconfig.pipeline
+    ).trim();
     const pipelineOptions = {
       sequential: s || sequential,
       tagsExpr: t || tags,
-    };
+    } as RunPipelineOptions;
 
-    const runner = await createPipeline(
-      typeof glob === "string" ? [glob] : glob,
-      {
-        handler: {
-          ...defaultRegistry,
-          ...additionalHandlers,
-        },
-        filters: {
-          ...defaultFilterRegistry,
-        },
-      },
-      configs,
-      pipelineOptions
-    );
+    versa.pipeline.store.actions.setVoters({
+      ...defaultTaskRunVoterRecord,
+      ...additionalVoters,
+    });
 
-    if (!runner) {
-      return;
+    versa.pipeline.store.actions.setFilters({
+      ...defaultTaskRunFilterRecord,
+      ...additionalFilters,
+    });
+
+    const versaPipeline = await createPipeline({
+      config: configs,
+      glob,
+    });
+
+    if (!versaPipeline) {
+      throw new Error(
+        `No pipelines found in "${
+          typeof glob === "string" ? glob : glob.join(", ")
+        }"`
+      );
     }
 
-    await runner.run(versa.pipeline.output, pipelineOptions);
+    await versaPipeline?.runAll({
+      config: configs,
+      options: pipelineOptions,
+      output: versa.pipeline?.output ?? (() => process.stdout),
+    });
   },
 };

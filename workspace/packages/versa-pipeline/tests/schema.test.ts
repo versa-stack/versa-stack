@@ -1,7 +1,5 @@
-import { Pipeline } from "../src";
-import { PipelineInvalidError } from "../src";
+import { Pipeline, PipelineInvalidError, Task, WhenTask } from "../src";
 import schema from "../src/schema";
-import { Task, WhenTask } from "../src/model";
 
 describe("validatePipeline", () => {
   const validPipeline = {

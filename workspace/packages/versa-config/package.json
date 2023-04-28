@@ -33,7 +33,7 @@
     "@types/jest": "^29.5.0",
     "@types/jsonpath": "^0.2.0",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.15.11",
+    "@types/node": "^18.16.1",
     "bunyan": "^1.8.15",
     "bunyan-blackhole": "^1.1.1",
     "ftp-srv": "^4.6.2",

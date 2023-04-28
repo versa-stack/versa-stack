@@ -101,3 +101,17 @@ Please refer to https://github.com/NimitzDEV/logical-expression-parser for how t
 ```bash
 versa-cli run --tags cool --p ./versa-demo-pipeline.yaml
 ```
+
+### Runtime configuration
+
+Configurations found in `.versarc`
+
+```yaml
+pipeline: # Set glob/s to pipeline yaml
+  - ./versa-demo-pipeline.yaml
+  - "**/.pipeline.yaml"
+outputMode: short # CLI output format
+configPath: .versa # Path to repository configuration
+glob: # Glob options
+  ignore: node_modules/**
+```

@@ -2,7 +2,6 @@ import { VersaToolbox } from "@versa-stack/types";
 import {
   AddJobPayload,
   Pipeline,
-  RunPipelinePayload,
   RunTaskPayload,
   SetResultPayload,
   VersaPipelineToolbox,
@@ -11,6 +10,7 @@ import { GluegunToolbox } from "gluegun";
 import { Writable } from "stream";
 import { VersaLoggingToolbox } from "../model";
 import { taskStdStream as taskRunnerLogStream } from "../streams";
+import { RunPipelinePayload } from "@versa-stack/versa-pipeline/lib/types/pipeline/run/runPipeline";
 
 const writables: Record<string, Writable> = {};
 
@@ -81,7 +81,7 @@ export default async (toolbox: Toolbox) => {
     },
     runPipeline: async (payload: RunPipelinePayload) => {
       toolbox.versa.log.info({
-        msg: `running pipeline "${payload.pipelineName}"`,
+        msg: `running pipeline "${payload.pipeline}"`,
         action: "runPipeline",
         payload,
       });

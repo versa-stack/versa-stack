@@ -11,7 +11,7 @@
   "author": "Khair-ed-Din Husseini <kmhusseini@gmail.com>",
   "devDependencies": {
     "@algolia/client-search": "^4",
-    "@types/node": "^18.15.12",
+    "@types/node": "^18.6.1",
     "vitepress": "^v1.0.0-alpha.73",
     "vue": "^3.2.47"
   },

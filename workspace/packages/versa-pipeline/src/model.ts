@@ -1,7 +1,8 @@
+import { VersaConfig } from "@versa-stack/types";
 import { Writable } from "stream";
-import { pipelineRunnerStore } from "./store/runner";
+import { pipelineStore } from "./pipeline/store";
 
-export type VersaOutputFactory = (...args: any) => Writable;
+export type VersaOutputFactory = (payload: RunJobPayload) => Writable;
 
 export type VersaPipelineToolbox = {
   versa: {
@@ -10,23 +11,24 @@ export type VersaPipelineToolbox = {
 };
 
 export type VersaPipeline = {
-  store: typeof pipelineRunnerStore.getters;
-  hooks: typeof pipelineRunnerStore.hooks;
+  store: typeof pipelineStore;
+  hooks: typeof pipelineStore.hooks;
   output?: VersaOutputFactory;
-  handlers?: TaskRunHandlerRegistry;
+  voters?: TaskRunVoterRecord;
+  filters?: TaskRunFilterRecord;
 };
 
 export type TaskRunHandlerVote = {
   weight: number;
   handler: TaskRunHandler;
+  id: string;
 };
 
-export type TaskRunHandlerRegistry = Record<
-  string,
-  (t: Task) => TaskRunHandlerVote
->;
+export type TaskRunVoter = (payload: RunTaskPayload) => TaskRunHandlerVote;
 
-export type TaskRunFilterRegistry = Record<string, TaskRunFilter>;
+export type TaskRunVoterRecord = Record<string, TaskRunVoter>;
+
+export type TaskRunFilterRecord = Record<string, TaskRunFilter>;
 
 export type AddJobPayload = {
   job: Job;
@@ -36,7 +38,6 @@ export type AddJobPayload = {
 
 export type AddPipelinePayload = {
   pipeline: Pipeline;
-  filters: TaskRunFilterRegistry;
 };
 
 export type SetResultPayload = {
@@ -44,33 +45,6 @@ export type SetResultPayload = {
   pipeline: string;
   path: string;
 };
-
-export type RunPipelinePayload = {
-  pipelineName: string;
-  output: VersaOutputFactory;
-  filters: TaskRunFilterRegistry;
-};
-
-export type RunTaskPayload<T extends Task = Task> = {
-  task: T;
-  handler: TaskRunHandler<T>;
-  output: ReturnType<VersaOutputFactory>;
-  options: RunTaskPayloadOptions;
-};
-
-export type RunTaskPayloadOptions = {
-  sequential: boolean;
-  tagsExpr?: string;
-};
-
-export type BuildJobPayload<T extends Task = Task> = {
-  dependsOn?: string;
-} & Omit<RunTaskPayload<T>, "output">;
-
-export type BuildPipelinePayload<T extends Task = Task> = {
-  handler: TaskRunHandler<T>;
-  pipeline: Pipeline;
-} & Pick<RunTaskPayload, "options">;
 
 export interface Pipeline {
   name: string;
@@ -85,6 +59,7 @@ export type Task = {
   scripts: string[];
   stage: string;
   workingDir?: string;
+  tags?: string[];
 };
 
 export type DockerTask = {
@@ -120,13 +95,19 @@ export type TaskRunResult = {
   output?: Record<string, any>;
 };
 export type TaskRunHandlerResult = Promise<TaskRunResult[]>;
-export type TaskRunHandler<T extends Task = Task> = (
-  payload: RunTaskPayload<T>,
-  main?: TaskRunHandler<T>
+export type TaskRunHandler<
+  C extends VersaConfig = VersaConfig,
+  T extends Task = Task
+> = (
+  payload: RunTaskPayload<C, T>,
+  chain?: TaskRunHandler<C, T>
 ) => TaskRunHandlerResult;
 
-export type TaskRunFilter<T extends Task = Task> = (
-  payload: RunTaskPayload<T>
+export type TaskRunFilter = <
+  C extends VersaConfig = VersaConfig,
+  T extends Task = Task
+>(
+  payload: RunJobPayload
 ) => TaskRunFilterResult;
 
 export type TaskRunFilterResult = {
@@ -134,7 +115,32 @@ export type TaskRunFilterResult = {
   msg?: string;
 };
 
-export type Job = (
-  output: VersaOutputFactory,
-  filters: TaskRunFilterRegistry
+export type RunTaskPayload<
+  C extends VersaConfig = VersaConfig,
+  T extends Task = Task
+> = Omit<RunJobPayload<C, T>, "output"> & {
+  output: ReturnType<VersaOutputFactory>;
+};
+
+export type Job = <C extends VersaConfig = VersaConfig, T extends Task = Task>(
+  payload: RunJobPayload<C, T>
 ) => TaskRunHandlerResult;
+
+export type RunJobPayload<
+  C extends VersaConfig = VersaConfig,
+  T extends Task = Task
+> = {
+  config: C;
+  options: RunPipelineOptions;
+  output: VersaOutputFactory;
+  task: T;
+};
+
+export type BuildPipelinePayload = {
+  pipeline: Pipeline;
+};
+
+export type RunPipelineOptions = {
+  tagsExpr?: string;
+  sequential?: boolean;
+} & Record<string, string | boolean | number>;

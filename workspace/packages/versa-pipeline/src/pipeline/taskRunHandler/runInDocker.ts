@@ -1,17 +1,13 @@
+import { VersaConfig } from "@versa-stack/types";
 import Docker from "dockerode";
 import * as os from "os";
-import {
-  DockerTask,
-  RunTaskPayload,
-  Task,
-  TaskRunHandler,
-  TaskRunResult,
-} from "../model";
+import { DockerTask, Task, TaskRunHandler, TaskRunResult } from "../../model";
 import { runInShell } from "./runInShell";
 
-export const runInDocker: TaskRunHandler = async (
-  payload: RunTaskPayload<Task & Partial<DockerTask>>
-) => {
+export const runInDocker: TaskRunHandler<
+  VersaConfig,
+  Task & DockerTask
+> = async (payload) => {
   const { task, output } = payload;
   const docker = new Docker();
 
@@ -25,7 +21,7 @@ export const runInDocker: TaskRunHandler = async (
   const volumeConfig = {
     binds: [
       `${task.workingDir}:/opt/repository`,
-      // `${__dirname}/scripts:/usr/local/bin/scripts`,
+      `${__dirname}/scripts:/usr/local/bin/scripts`,
     ],
     volumes: {
       "/opt/repository": {},
@@ -38,15 +34,15 @@ export const runInDocker: TaskRunHandler = async (
   });
 
   await runInShell({
-    output,
+    ...payload,
     task: {
-      name: "docker-pull-task-image",
+      name: `${task.name}-pull-docker-image`,
       pipeline: task.pipeline,
       scripts: [`docker pull ${task.image}`],
       stage: task.stage,
       workingDir: process.cwd(),
     },
-  } as RunTaskPayload);
+  });
 
   const userinfo = task.user
     ? {
@@ -55,27 +51,22 @@ export const runInDocker: TaskRunHandler = async (
       }
     : os.userInfo();
 
-  const addUser =
-    userinfo.uid === 0
-      ? ``
-      : `/usr/local/bin/script/adduser.sh ${userinfo.username} ${userinfo.uid} ${userinfo.gid} && su -s /bin/sh ${userinfo.username} -c`;
+  // const addUser =
+  //   userinfo.uid === 0
+  //     ? ``
+  //     : `/usr/local/bin/scripts/adduser.sh ${userinfo.username} ${userinfo.uid} ${userinfo.gid} && su -s /bin/sh ${userinfo.username} -c`;
 
   return Promise.all(
     task.scripts.map((command) =>
       docker
-        .run(
-          task.image as string,
-          ["/bin/sh", "-c", `${addUser}${command}`],
-          output,
-          {
-            WorkingDir: task.workingDir,
-            Volumes: volumeConfig?.volumes ?? [],
-            Env: Object.entries(process.env).map(([k, v]) => `${k}=${v}`),
-            Hostconfig: {
-              Binds: volumeConfig?.binds ?? {},
-            },
-          }
-        )
+        .run(task.image as string, ["/bin/sh", "-c", `${command}`], output, {
+          WorkingDir: task.workingDir,
+          Volumes: volumeConfig?.volumes ?? [],
+          Env: Object.entries(process.env).map(([k, v]) => `${k}=${v}`),
+          Hostconfig: {
+            Binds: volumeConfig?.binds ?? {},
+          },
+        })
         .then(([output, container]) => {
           container.remove();
           return [output, container];

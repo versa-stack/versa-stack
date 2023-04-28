@@ -1,7 +1,7 @@
 import LEP from "logical-expression-parser";
-import { TaggedTask, Task, TaskRunFilter, TaskRunFilterResult } from "../model";
+import { TaskRunFilter, TaskRunFilterResult } from "../../model";
 
-export const tagFilter: TaskRunFilter<Task & TaggedTask> = (payload) => {
+export const tagFilter: TaskRunFilter = (payload) => {
   const { tags } = payload.task;
   const { tagsExpr } = payload.options;
   if (!tagsExpr) {
@@ -10,7 +10,7 @@ export const tagFilter: TaskRunFilter<Task & TaggedTask> = (payload) => {
 
   return filterResult(
     !LEP.parse(`always|(${tagsExpr})`, (t) => (tags ?? []).includes(t)),
-    tags ?? [],
+    tags ?? [] as string[],
     tagsExpr
   );
 };

@@ -1,7 +1,6 @@
 import { VersaConfig, VersaToolbox } from "@versa-stack/types";
 import {
-  VersaPipelineToolbox,
-  pipelineRunnerStore,
+  VersaPipelineToolbox, pipelineStore,
 } from "@versa-stack/versa-pipeline";
 import { GluegunToolbox } from "gluegun";
 import { waitFor } from "../utilities";
@@ -19,7 +18,7 @@ export default async (
   }
 
   toolbox.versa.pipeline = {
-    store: pipelineRunnerStore.getters,
-    hooks: pipelineRunnerStore.hooks,
+    store: pipelineStore,
+    hooks: pipelineStore.hooks,
   };
 };

@@ -1,4 +1,5 @@
 import { Hookable, createHooks } from "hookable";
+import { filterSensitiveData } from "../filterSensitiveData";
 
 export type AppliedAction<T = any> = (...args: T[]) => T;
 
@@ -58,7 +59,7 @@ export const createActions = <
   const appliedActions: Record<string, AppliedAction> = {};
   Object.entries(actions).forEach(([name, action]) => {
     appliedActions[name] = (...args: any[]) => {
-      store.hooks.callHook(name, ...args);
+      store.hooks.callHook(name, filterSensitiveData(args));
       return action(store.state, ...args);
     };
   });

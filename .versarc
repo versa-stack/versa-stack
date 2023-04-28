@@ -1,2 +1,7 @@
-pipeline: pipeline.yaml
+pipeline:
+  - ./versa-demo-pipeline.yaml
+  - "**/.pipeline.yaml"
 outputMode: short
+configPath: .versa
+glob:
+  ignore: node_modules/**

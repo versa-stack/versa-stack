@@ -1,4 +1,4 @@
-import { Task, TaskRunFilter, TaskRunFilterResult, WhenTask } from "../model";
+import { Task, TaskRunFilter, TaskRunFilterResult, WhenTask } from "../../model";
 
 const filterResult = (skip: boolean, when?: string) =>
   ({
@@ -6,7 +6,8 @@ const filterResult = (skip: boolean, when?: string) =>
     msg: skip ? `skipped because "${when ?? ""}" was truhty` : "",
   } as TaskRunFilterResult);
 
-export const whenFilter: TaskRunFilter<WhenTask & Task> = ({ task }) => {
+export const whenFilter: TaskRunFilter = (payload) => {
+  const task: Task & WhenTask = payload.task;
   const matches = /([^==|!=]+)(!=|==)(.*)/.exec(task.when as string);
 
   if (task.when === undefined) {

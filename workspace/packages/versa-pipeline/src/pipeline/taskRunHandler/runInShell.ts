@@ -1,9 +1,11 @@
+import { VersaConfig } from "@versa-stack/types";
 import { execa } from "execa";
 import process from "process";
-import type { TaskRunHandler, TaskRunResult } from "../model";
-import { RunTaskPayload } from "../model";
+import { DockerTask, Task, TaskRunHandler } from "../../model";
 
-export const runInShell: TaskRunHandler = async (payload: RunTaskPayload) => {
+export const runInShell: TaskRunHandler<VersaConfig, Task & DockerTask> = (
+  payload
+) => {
   const { task, output } = payload;
   return Promise.all(
     task.scripts.map((command: string) => {
@@ -33,7 +35,7 @@ export const runInShell: TaskRunHandler = async (payload: RunTaskPayload) => {
               code: r.exitCode,
               msg: r.stdout,
             },
-          } as TaskRunResult;
+          };
         })
         .catch((r) => {
           return {
@@ -43,7 +45,7 @@ export const runInShell: TaskRunHandler = async (payload: RunTaskPayload) => {
               code: r.exitCode,
               msg: r.shortMessage,
             },
-          } as any as TaskRunResult;
+          };
         });
     })
   );
