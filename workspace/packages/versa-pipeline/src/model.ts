@@ -136,6 +136,10 @@ export type RunJobPayload<
   task: T;
 };
 
+export type DonePayload<P> = P & {
+  results: TaskRunResult[];
+};
+
 export type BuildPipelinePayload = {
   pipeline: Pipeline;
 };
@@ -144,3 +148,20 @@ export type RunPipelineOptions = {
   tagsExpr?: string;
   sequential?: boolean;
 } & Record<string, string | boolean | number>;
+
+export type RunTaskOutputPayload = {
+  output: string;
+} & RunTaskPayload;
+
+export enum PipelineHooks {
+  addPipeline = "addPipeline",
+  runPipeline = "runPipeline",
+  runPipelineDone = "runPipelineDone",
+  addJob = "addJob",
+  runJob = "runJob",
+  runJobDone = "runJobDone",
+  runTask = "runTask",
+  runTaskOutput = "runTaskOutput",
+  runTaskDone = "runTaskDone",
+  setResults = "setResults",
+}

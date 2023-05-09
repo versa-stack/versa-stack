@@ -59,7 +59,7 @@ export const createActions = <
   const appliedActions: Record<string, AppliedAction> = {};
   Object.entries(actions).forEach(([name, action]) => {
     appliedActions[name] = (...args: any[]) => {
-      store.hooks.callHook(name, filterSensitiveData(args));
+      store.hooks.callHook(name, ...filterSensitiveData(args));
       return action(store.state, ...args);
     };
   });

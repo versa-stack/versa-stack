@@ -1,7 +1,11 @@
 import { VersaToolbox } from "@versa-stack/types";
 import {
   AddJobPayload,
+  DonePayload,
   Pipeline,
+  PipelineHooks,
+  RunJobPayload,
+  RunTaskOutputPayload,
   RunTaskPayload,
   SetResultPayload,
   VersaPipelineToolbox,
@@ -58,54 +62,58 @@ export default async (toolbox: Toolbox) => {
   }
 
   toolbox.versa.pipeline?.hooks.addHooks({
-    addPipeline: async (payload: Pipeline) => {
-      toolbox.versa.log.info({
+    [`${PipelineHooks.addPipeline}`]: async (payload: Pipeline) => {
+      toolbox.versa.log.trace(`added pipeline "${payload.name}"`, {
         msg: `added pipeline "${payload.name}"`,
-        action: "appPipeline",
+        action: "addPipeline",
         payload,
       });
     },
-    addJob: async (payload: AddJobPayload) => {
-      toolbox.versa.log.info({
-        msg: `added job ${payload.path} to pipeline "${payload.pipeline}"`,
-        action: "addJob",
-        payload,
-      });
+    [`${PipelineHooks.addJob}`]: async (payload: AddJobPayload) => {
+      toolbox.versa.log.trace(
+        `added job ${payload.path} to pipeline "${payload.pipeline}"`,
+        {
+          action: "addJob",
+          payload,
+        }
+      );
     },
-    setResults: async (payload: SetResultPayload) => {
-      toolbox.versa.log.info({
-        msg: `results from job "${payload.path}" in pipeline "${payload.pipeline}"`,
-        action: "setResults",
-        payload,
-      });
+    [`${PipelineHooks.setResults}`]: async (payload: SetResultPayload) => {
+      toolbox.versa.log.trace(
+        `results from job "${payload.path}" in pipeline "${payload.pipeline}"`,
+        {
+          action: "setResults",
+          payload,
+        }
+      );
     },
-    runPipeline: async (payload: RunPipelinePayload) => {
-      toolbox.versa.log.info({
-        msg: `running pipeline "${payload.pipeline}"`,
+    [`${PipelineHooks.runPipeline}`]: async (payload: RunPipelinePayload) => {
+      toolbox.versa.log.trace(`running pipeline "${payload.pipeline}"`, {
         action: "runPipeline",
         payload,
       });
     },
-    runPipelineDone: async (payload: any) => {
-      toolbox.versa.log.info({
-        msg: `done running pipeline "${payload.pipeline.name}"`,
+    [`${PipelineHooks.runPipelineDone}`]: async (
+      payload: DonePayload<RunPipelinePayload>
+    ) => {
+      toolbox.versa.log.trace(`done running pipeline "${payload.pipeline}"`, {
         action: "runPipelineDone",
         payload,
       });
     },
+    [`${PipelineHooks.runJob}`]: async (payload: RunJobPayload) => {},
+    [`${PipelineHooks.runJobDone}`]: async (
+      payload: DonePayload<RunJobPayload>
+    ) => {},
+    runTaskOutput: async (payload: RunTaskOutputPayload) => {},
     runTask: async (payload: RunTaskPayload) => {
-      toolbox.versa.log.info({
-        msg: `running task "${payload.task.name}" in stage "${payload.task.name}" for pipeline "${payload.task.pipeline}"`,
-        action: "runTask",
-        payload,
-      });
-    },
-    runTaskDone: async (payload: any) => {
-      toolbox.versa.log.info({
-        msg: `done running task "${payload.task.name}" in stage "${payload.task.stage}" for pipeline "${payload.task.pipeline}"`,
-        action: "runTaskDone",
-        payload,
-      });
+      toolbox.versa.log.trace(
+        `running task "${payload.task.name}" in stage "${payload.task.name}" for pipeline "${payload.task.pipeline}"`,
+        {
+          action: "runTask",
+          payload,
+        }
+      );
     },
   });
 };

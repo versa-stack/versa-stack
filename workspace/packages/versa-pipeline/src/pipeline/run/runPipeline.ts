@@ -1,6 +1,11 @@
 import { VersaConfig } from "@versa-stack/types";
 import { filterSensitiveData } from "../../filterSensitiveData";
-import { Pipeline, RunJobPayload, TaskRunHandlerResult } from "../../model";
+import {
+  Pipeline,
+  RunJobPayload,
+  TaskRunHandlerResult,
+  PipelineHooks,
+} from "../../model";
 import { pipelineStore } from "../store";
 
 export type RunPipelinePayload<C extends VersaConfig = VersaConfig> = {
@@ -10,7 +15,10 @@ export type RunPipelinePayload<C extends VersaConfig = VersaConfig> = {
 export const runPipeline = async <C extends VersaConfig = VersaConfig>(
   payload: RunPipelinePayload<C>
 ) => {
-  pipelineStore.hooks.callHook("runPipeline", filterSensitiveData(payload));
+  pipelineStore.hooks.callHook(
+    PipelineHooks.runPipeline,
+    filterSensitiveData(payload)
+  );
   const pipeline: Pipeline = pipelineStore.getters.pipeline(payload.pipeline);
 
   if (!pipeline.stages) {
@@ -36,7 +44,7 @@ export const runPipeline = async <C extends VersaConfig = VersaConfig>(
   }
 
   return Promise.all(promises.flat()).then((results) => {
-    pipelineStore.hooks.callHook("runPipelineDone", {
+    pipelineStore.hooks.callHook(PipelineHooks.runPipelineDone, {
       ...filterSensitiveData(payload),
       results,
     });
