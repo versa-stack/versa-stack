@@ -1,10 +1,12 @@
 import { VersaConfig } from "@versa-stack/types";
+
+import * as Bluebird from "bluebird";
 import { filterSensitiveData } from "../../filterSensitiveData";
 import {
   Pipeline,
+  PipelineHooks,
   RunJobPayload,
   TaskRunHandlerResult,
-  PipelineHooks,
 } from "../../model";
 import { pipelineStore } from "../store";
 
@@ -22,7 +24,7 @@ export const runPipeline = async <C extends VersaConfig = VersaConfig>(
   const pipeline: Pipeline = pipelineStore.getters.pipeline(payload.pipeline);
 
   if (!pipeline.stages) {
-    return Promise.resolve([]);
+    return Bluebird.Promise.resolve([]);
   }
 
   const promises: TaskRunHandlerResult[] = [];
@@ -43,7 +45,7 @@ export const runPipeline = async <C extends VersaConfig = VersaConfig>(
     );
   }
 
-  return Promise.all(promises.flat()).then((results) => {
+  return Bluebird.Promise.all(promises.flat()).then((results) => {
     pipelineStore.hooks.callHook(PipelineHooks.runPipelineDone, {
       ...filterSensitiveData(payload),
       results,

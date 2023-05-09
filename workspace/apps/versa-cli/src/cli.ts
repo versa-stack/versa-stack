@@ -1,6 +1,10 @@
+import * as Bluebird from "bluebird";
 import { build } from "gluegun";
 import { Options } from "gluegun/build/types/domain/options";
 import versaCommand from "./commands/versa";
+
+interface Promise<T> extends Bluebird<T> {}
+global.Promise = Promise;
 
 /**
  * Create the cli and kick it off

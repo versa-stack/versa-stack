@@ -1,7 +1,9 @@
 import {
   AddJobPayload,
   Job,
+  JobStatus,
   Pipeline,
+  PipelineStatus,
   SetResultPayload,
   Task,
   TaskRunFilterRecord,
@@ -17,8 +19,16 @@ export const pipelineStore = createStore(
     jobs: {} as Record<string, Record<string, Job>>,
     filters: {} as TaskRunFilterRecord,
     voters: {} as TaskRunVoterRecord,
+    status: {} as PipelineStatus,
   },
   {
+    setStatus: (state, pipeline: string, status: JobStatus) => {
+      if (!state.status[pipeline]) {
+        state.status[pipeline] = {};
+      }
+
+      state.status[pipeline][status.path] = status;
+    },
     setFilters: (state, filters: TaskRunFilterRecord) =>
       (state.filters = filters),
     setVoters: (state, voters: TaskRunVoterRecord) => (state.voters = voters),

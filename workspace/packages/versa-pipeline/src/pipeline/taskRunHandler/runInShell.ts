@@ -2,12 +2,13 @@ import { VersaConfig } from "@versa-stack/types";
 import { execa } from "execa";
 import process from "process";
 import { DockerTask, Task, TaskRunHandler } from "../../model";
+import * as Bluebird from 'bluebird';
 
 export const runInShell: TaskRunHandler<VersaConfig, Task & DockerTask> = (
   payload
 ) => {
   const { task, output } = payload;
-  return Promise.all(
+  return Bluebird.Promise.all(
     task.scripts.map((command: string) => {
       const taskProcess = execa("/bin/bash", ["-c", command], {
         cwd: task.workingDir,

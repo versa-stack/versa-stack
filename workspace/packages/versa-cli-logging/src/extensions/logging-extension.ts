@@ -10,11 +10,12 @@ import {
   SetResultPayload,
   VersaPipelineToolbox,
 } from "@versa-stack/versa-pipeline";
+import { RunPipelinePayload } from "@versa-stack/versa-pipeline/lib/types/pipeline/run/runPipeline";
 import { GluegunToolbox } from "gluegun";
 import { Writable } from "stream";
 import { VersaLoggingToolbox } from "../model";
 import { taskStdStream as taskRunnerLogStream } from "../streams";
-import { RunPipelinePayload } from "@versa-stack/versa-pipeline/lib/types/pipeline/run/runPipeline";
+import { waitFor } from "../waitFor";
 
 const writables: Record<string, Writable> = {};
 
@@ -116,24 +117,4 @@ export default async (toolbox: Toolbox) => {
       );
     },
   });
-};
-
-export const waitFor = async (
-  value: () => any,
-  options: {
-    maxWaitSeconds: number;
-    waitMs: number;
-  } = {
-    maxWaitSeconds: 3,
-    waitMs: 5,
-  }
-) => {
-  const { maxWaitSeconds, waitMs } = options;
-  const maxWait = maxWaitSeconds * 1000;
-  let counter = 0;
-
-  while (!value() && maxWait > counter) {
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
-    counter += waitMs;
-  }
 };

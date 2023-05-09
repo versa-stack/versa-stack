@@ -1,12 +1,15 @@
 import { filterSensitiveData } from "../../filterSensitiveData";
-import { Job, RunJobPayload, PipelineHooks } from '../../model';
+import { Job, PipelineHooks, RunJobPayload } from "../../model";
 import { pipelineStore } from "../store";
 import { resolveResults } from "./resolveResults";
 
 export const runJob: Job = async (payload: RunJobPayload) => {
   const { task } = payload;
 
-  pipelineStore.hooks.callHook(PipelineHooks.runJob, filterSensitiveData(payload));
+  pipelineStore.hooks.callHook(
+    PipelineHooks.runJob,
+    filterSensitiveData(payload)
+  );
 
   return pipelineStore.actions.setResults({
     path: `${task.stage}:${task.name}`,

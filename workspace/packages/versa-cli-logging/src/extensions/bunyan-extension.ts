@@ -4,7 +4,7 @@ import bunyan from "bunyan";
 import bformat from "bunyan-format";
 import { GluegunToolbox } from "gluegun";
 import { VersaLoggingToolbox } from "../model";
-import { waitFor } from "./logging-extension";
+import { waitFor } from "../waitFor";
 
 const defaultLoggerOptions: bunyan.LoggerOptions = {
   name: "versa-cli",

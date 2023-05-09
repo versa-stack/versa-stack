@@ -164,4 +164,22 @@ export enum PipelineHooks {
   runTaskOutput = "runTaskOutput",
   runTaskDone = "runTaskDone",
   setResults = "setResults",
+  setStatus = "setStatus",
+}
+
+export type PipelineStatus = Record<string, Record<string, JobStatus>>;
+
+export type JobStatus = {
+  path: string;
+  status: JobStatusEnum;
+  task: Task;
+};
+
+export enum JobStatusEnum {
+  ADDED = "added",
+  PENDING = "pending",
+  RUNNING = "running",
+  DONE = "done",
+  CANCELLED = "cancelled",
+  SKIPPED = "skipped",
 }
