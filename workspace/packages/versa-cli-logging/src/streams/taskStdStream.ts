@@ -1,6 +1,6 @@
 import {
   VersaOutputFactory,
-  VersaPipelineToolbox
+  VersaPipelineToolbox,
 } from "@versa-stack/versa-pipeline";
 import { Writable } from "stream";
 import { VersaLoggingToolbox } from "../model";
@@ -11,13 +11,10 @@ const outputFactory: (
   return new Writable({
     write(chunk: Buffer, _, callback: () => void) {
       const stdOut = chunk.toString();
-      if (!toolbox.versa.pipeline?.hooks) {
-        toolbox.versa.log.trace(stdOut, {
-          payload,
-        });
-        callback();
-        return;
-      }
+      toolbox.versa.log.info(
+        `[Pipeline: ${payload.task.pipeline}] --> ${payload.task.stage}:${payload.task.name}`,
+        `${stdOut}`
+      );
 
       toolbox.versa.pipeline?.hooks.callHook("runTaskOutput", {
         output: chunk.toString(),

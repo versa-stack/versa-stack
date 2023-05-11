@@ -1,17 +1,18 @@
 import * as Bluebird from "bluebird";
 import { filterSensitiveData } from "../../filterSensitiveData";
 import {
+  JobStatus,
+  JobStatusEnum,
   RunJobPayload,
   TaskRunHandlerResult,
   TaskRunResultCodeEnum,
 } from "../../model";
+import { pipelineStore } from "../store";
 import { applyFilters } from "../taskRunFilter/index";
 import { runTask } from "./runTask";
 import { waitForResults } from "./waitForResults";
-import { pipelineStore } from "../store";
-import { JobStatusEnum } from "../../model";
 
-export const resolveResults = (
+export const resolveResults = async (
   payload: RunJobPayload
 ): TaskRunHandlerResult => {
   const filteredJob = applyFilters(payload);
@@ -40,26 +41,47 @@ export const resolveResults = (
     task: payload.task,
   });
 
-  return waitForResults(payload.task.pipeline, payload.task.depends || []).then(
-    () => {
+  return waitForResults(payload.task, payload.task.depends || []).then(
+    async (results) => {
+      if (
+        results.find((i) => i.status.code === TaskRunResultCodeEnum.CANCELLED)
+      ) {
+        pipelineStore.actions.setStatus(payload.task.pipeline, {
+          path: `${payload.task.stage}:${payload.task.name}`,
+          status: JobStatusEnum.CANCELLED,
+          task: payload.task,
+          results,
+        } as JobStatus);
+        return results;
+      }
+
       pipelineStore.actions.setStatus(payload.task.pipeline, {
         path: `${payload.task.stage}:${payload.task.name}`,
         status: JobStatusEnum.RUNNING,
         task: payload.task,
       });
 
-      return runTask({
+      const taskResults = await runTask({
         ...payload,
         output: payload.output(filterSensitiveData(payload)),
-      }).then((results) => {
-        pipelineStore.actions.setStatus(payload.task.pipeline, {
-          path: `${payload.task.stage}:${payload.task.name}`,
-          status: JobStatusEnum.DONE,
-          task: payload.task,
-        });
-
-        return results;
       });
+
+      const status = {
+        path: `${payload.task.stage}:${payload.task.name}`,
+        status: JobStatusEnum.DONE,
+        task: payload.task,
+        results,
+      } as JobStatus;
+
+      taskResults.forEach((r) => {
+        if (r.error) {
+          status.status = JobStatusEnum.ERROR;
+        }
+      });
+
+      pipelineStore.actions.setStatus(payload.task.pipeline, status);
+
+      return taskResults;
     }
   );
 };

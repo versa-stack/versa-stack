@@ -27,6 +27,19 @@ export const pipelineStore = createStore(
         state.status[pipeline] = {};
       }
 
+      if (state.status[pipeline][status.path]) {
+        const oldStatus = state.status[pipeline][status.path];
+
+        if (oldStatus.stdout && status.stdout) {
+          status.stdout = oldStatus.stdout + status.stdout;
+        }
+
+        status = {
+          ...oldStatus,
+          ...status,
+        };
+      }
+
       state.status[pipeline][status.path] = status;
     },
     setFilters: (state, filters: TaskRunFilterRecord) =>

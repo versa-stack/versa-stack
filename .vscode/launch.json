@@ -6,7 +6,7 @@
       "request": "launch",
       "name": "Run pipeline",
       "program": "${workspaceFolder}/workspace/apps/versa-cli/bin/versa-cli.js",
-      "args": ["run", "-p versa-demo-pipeline.yaml"],
+      "args": ["run"],
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart",
       "preLaunchTask": "build"

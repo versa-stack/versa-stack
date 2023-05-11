@@ -15,6 +15,10 @@ stages:
         - echo "hello world again"
       tags:
         - always
+    - name: failed-task
+      image: alpine
+      scripts:
+        - what?
   build:
     - name: build-task
       image: alpine
@@ -22,6 +26,8 @@ stages:
         - echo "build task"
   deploy:
     - name: deploy-task
+      depends:
+        - test:test-task
       image: alpine
       scripts:
         - echo "demo-tag"

@@ -6,6 +6,7 @@ import {
   defaultTaskRunFilterRecord,
   defaultTaskRunVoterRecord,
   pipelineStore,
+  stdOutStream,
 } from "@versa-stack/versa-pipeline";
 import { GluegunToolbox } from "gluegun";
 import { Toolbox } from "gluegun/build/types/domain/toolbox";
@@ -40,11 +41,8 @@ export default {
 
     const additionalVoters = versa?.pipeline.voters ?? {};
     const additionalFilters = versa?.pipeline.filters ?? {};
-    const glob: string | string[] = (
-      p ??
-      pipeline ??
-      configs.runconfig.pipeline
-    ).trim();
+    const glob: string | string[] =
+      (p ?? pipeline)?.trim() ?? configs.runconfig.pipeline;
     const pipelineOptions = {
       sequential: s || sequential,
       tagsExpr: t || tags,
@@ -76,7 +74,7 @@ export default {
     await versaPipeline?.runAll({
       config: configs,
       options: pipelineOptions,
-      output: versa.pipeline?.output ?? (() => process.stdout),
+      output: stdOutStream(versa.pipeline?.output ?? (() => process.stdout)),
     });
   },
 };

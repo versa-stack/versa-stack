@@ -5,12 +5,12 @@ import {
   Pipeline,
   PipelineHooks,
   RunJobPayload,
+  RunPipelinePayload,
   RunTaskOutputPayload,
   RunTaskPayload,
   SetResultPayload,
   VersaPipelineToolbox,
 } from "@versa-stack/versa-pipeline";
-import { RunPipelinePayload } from "@versa-stack/versa-pipeline/lib/types/pipeline/run/runPipeline";
 import { GluegunToolbox } from "gluegun";
 import { Writable } from "stream";
 import { VersaLoggingToolbox } from "../model";

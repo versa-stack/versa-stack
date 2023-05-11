@@ -2,5 +2,7 @@ pipeline:
   - ./versa-demo-pipeline.yaml
   - "**/.pipeline.yaml"
 configPath: .versa
+loggerOptions:
+  level: error
 glob:
   ignore: node_modules/**

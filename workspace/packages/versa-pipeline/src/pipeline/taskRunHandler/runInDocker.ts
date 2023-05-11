@@ -1,10 +1,7 @@
 import { VersaConfig } from "@versa-stack/types";
-
 import Docker from "dockerode";
-import * as os from "os";
 import { DockerTask, Task, TaskRunHandler, TaskRunResult } from "../../model";
 import { runInShell } from "./runInShell";
-import * as Bluebird from 'bluebird';
 
 export const runInDocker: TaskRunHandler<
   VersaConfig,
@@ -46,19 +43,7 @@ export const runInDocker: TaskRunHandler<
     },
   });
 
-  const userinfo = task.user
-    ? {
-        ...task.user,
-        gid: task.user.gid ?? task.user.uid,
-      }
-    : os.userInfo();
-
-  // const addUser =
-  //   userinfo.uid === 0
-  //     ? ``
-  //     : `/usr/local/bin/scripts/adduser.sh ${userinfo.username} ${userinfo.uid} ${userinfo.gid} && su -s /bin/sh ${userinfo.username} -c`;
-
-  return Bluebird.Promise.all(
+  return Promise.all(
     task.scripts.map((command) =>
       docker
         .run(task.image as string, ["/bin/sh", "-c", `${command}`], output, {
@@ -81,7 +66,8 @@ export const runInDocker: TaskRunHandler<
               msg: output.Error,
             },
             output,
-            error: output.Error,
+            error:
+              output.Error ?? output.StausCode !== 0 ? output.StatusCode : null,
             details: [[output, container]],
           } as TaskRunResult;
         })

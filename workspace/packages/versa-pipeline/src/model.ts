@@ -81,10 +81,11 @@ export type TaggedTask = {
 };
 
 export enum TaskRunResultCodeEnum {
-  EOC = -2,
-  SUCCESS = -1,
-  SKIPPED = 85,
+  SUCCESS = 0,
+  SKIPPED = -86,
+  CANCELLED = -85,
 }
+
 export type TaskRunResult = {
   task: Task;
   status: {
@@ -94,7 +95,9 @@ export type TaskRunResult = {
   error?: any;
   output?: Record<string, any>;
 };
+
 export type TaskRunHandlerResult = Promise<TaskRunResult[]>;
+
 export type TaskRunHandler<
   C extends VersaConfig = VersaConfig,
   T extends Task = Task
@@ -173,6 +176,8 @@ export type JobStatus = {
   path: string;
   status: JobStatusEnum;
   task: Task;
+  results?: TaskRunResult[];
+  stdout?: string;
 };
 
 export enum JobStatusEnum {
@@ -182,4 +187,5 @@ export enum JobStatusEnum {
   DONE = "done",
   CANCELLED = "cancelled",
   SKIPPED = "skipped",
+  ERROR = "error",
 }

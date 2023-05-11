@@ -1,4 +1,9 @@
-import { Job, RunJobPayload } from "../../model";
+import {
+  Job,
+  RunJobPayload,
+  JobStatusEnum,
+  TaskRunResultCodeEnum,
+} from "../../model";
 import { pipelineStore } from "../store";
 import { waitForResults } from "./waitForResults";
 
@@ -26,7 +31,7 @@ export const runStageJob: Job = async (payload: RunJobPayload) => {
   }
 
   return pipelineStore.actions.setResults({
-    results: waitForResults(payload.task.pipeline, jobPaths),
+    results: waitForResults(payload.task, jobPaths),
     pipeline: payload.task.pipeline,
     path: payload.task.stage,
   });
