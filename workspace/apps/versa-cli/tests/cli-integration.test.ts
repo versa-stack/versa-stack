@@ -7,12 +7,12 @@ const cli = async (cmd: string) =>
 
 test("outputs version", async () => {
   const output = await cli("--version");
-  expect(output).toContain("0.0.0");
+  expect(output).toContain("0.4.0");
 });
 
 test("outputs help", async () => {
   const output = await cli("--help");
-  expect(output).toContain("0.0.0");
+  expect(output).toContain("0.4.0");
 });
 
 test("outputs config", async () => {
