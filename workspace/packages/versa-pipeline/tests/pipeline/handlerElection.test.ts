@@ -1,19 +1,27 @@
-import {
-  RunTaskPayload,
-  TaskRunResult,
-  TaskRunVoterRecord,
-} from "../../src/model";
+import HandlerElectionFailedError from "../../src/errors/handlerElectionFailed";
+import { RunTaskPayload, TaskRunVoterRecord } from "../../src/model";
 import { handlerElection } from "../../src/pipeline/handlerElection";
-import HandlerElectionFailedError from '../../src/errors/handlerElectionFailed';
+import { pipelineStore } from "../../src/pipeline/store";
 
 describe("handlerElection", () => {
-  it("throws an error when no voters are present", () => {
-    try {
-      handlerElection({}, {} as RunTaskPayload);
-    } catch (e) {
-      expect(e).toBeInstanceOf(HandlerElectionFailedError)
-    }
-  });
+  beforeEach(
+    () =>
+      (pipelineStore.state = {
+        filters: {},
+        jobs: {},
+        pipelines: {},
+        results: {},
+        status: {},
+        voters: {},
+      })
+  );
+    it("throws an error when no voters are present", () => {
+      try {
+        handlerElection({}, {} as RunTaskPayload);
+      } catch (e) {
+        expect(e).toBeInstanceOf(HandlerElectionFailedError);
+      }
+    });
 
   it("elects the correct handler", () => {
     const pickMe = jest.fn(async () => []);

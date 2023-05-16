@@ -8,7 +8,7 @@
     "lib": ["es2021"],
     "module": "CommonJS",
     "moduleResolution": "node",
-    "outDir": "lib",
+    "outDir": "./lib",
     "resolveJsonModule": true,
     "rootDir": "src",
     "sourceMap": true,

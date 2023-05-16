@@ -57,9 +57,9 @@ export type Task = {
   name: string;
   pipeline: string;
   scripts: string[];
-  stage: string;
-  workingDir?: string;
+  stage?: string;
   tags?: string[];
+  workingDir?: string;
 };
 
 export type DockerTask = {
@@ -188,4 +188,13 @@ export enum JobStatusEnum {
   CANCELLED = "cancelled",
   SKIPPED = "skipped",
   ERROR = "error",
+}
+
+export interface PipelineStoreState {
+  pipelines: Record<string, Pipeline>;
+  results: Record<string, Record<string, TaskRunHandlerResult>>;
+  jobs: Record<string, Record<string, Job>>;
+  filters: TaskRunFilterRecord;
+  voters: TaskRunVoterRecord;
+  status: PipelineStatus;
 }

@@ -22,8 +22,4 @@ export const runTask: TaskRunHandler = async (payload) => {
 
       return results;
     })
-    .catch((err) => {
-      const a = 0;
-      return err;
-    });
 };

@@ -1,12 +1,11 @@
 import * as Bluebird from "bluebird";
 import JobFailedError from "../../errors/jobFailed";
 import {
+  JobStatusEnum,
   Task,
   TaskRunHandlerResult,
-  TaskRunResultCodeEnum,
-  JobStatusEnum,
   TaskRunResult,
-  JobStatus,
+  TaskRunResultCodeEnum,
 } from "../../model";
 import { pipelineStore } from "../store";
 
@@ -17,17 +16,19 @@ export const waitForResults = async (task: Task, paths: string[]) => {
 
   const deps: TaskRunHandlerResult[] = [];
   for (const path of paths) {
-    while (!pipelineStore.getters.results(task.pipeline, path)) {
+    let r = pipelineStore.getters.results()(task.pipeline, path);
+    while (!r) {
       await new Bluebird.Promise((resolve) => setTimeout(resolve, 5));
+      r = pipelineStore.getters.results()(task.pipeline, path);
     }
 
-    deps.push(pipelineStore.getters.results(task.pipeline, path));
+    deps.push(pipelineStore.getters.results()(task.pipeline, path));
   }
 
   return await Bluebird.Promise.all(deps.flat())
     .then((r) => r.flat())
     .then((results) => {
-      if (task.name === task.stage) return results;
+      if (!task.stage) return results;
       const result = results.find((r) => !!r.error);
       if (result) {
         throw new JobFailedError(

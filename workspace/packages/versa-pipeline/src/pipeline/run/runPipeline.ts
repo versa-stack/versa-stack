@@ -21,7 +21,7 @@ export const runPipeline = async <C extends VersaConfig = VersaConfig>(
     PipelineHooks.runPipeline,
     filterSensitiveData(payload)
   );
-  const pipeline: Pipeline = pipelineStore.getters.pipeline(payload.pipeline);
+  const pipeline: Pipeline = pipelineStore.getters.pipeline()(payload.pipeline);
 
   if (!pipeline.stages) {
     return Bluebird.Promise.resolve([]);

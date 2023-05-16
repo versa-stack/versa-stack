@@ -8,22 +8,23 @@ import { pipelineStore } from "../store";
 import { waitForResults } from "./waitForResults";
 
 export const runStageJob: Job = async (payload: RunJobPayload) => {
-  const jobs: Job[] = pipelineStore.getters.jobsByStage(
+  const jobs: Job[] = pipelineStore.getters.jobsByStage()(
     payload.task.pipeline,
-    payload.task.stage
+    payload.task.name
   );
-  const jobPaths: string[] = pipelineStore.getters.jobPathsByStage(
+  const jobPaths: string[] = pipelineStore.getters.jobPathsByStage()(
     payload.task.pipeline,
-    payload.task.stage
+    payload.task.name
   );
 
   for (const index in jobs) {
     const path = jobPaths[index];
     if (!path) continue;
-    const jobTask = pipelineStore.getters.taskByPath(
+    const jobTask = pipelineStore.getters.taskByPath()(
       payload.task.pipeline,
       path
     );
+    if (!jobTask) continue;
     jobs[index]({
       ...payload,
       task: jobTask,

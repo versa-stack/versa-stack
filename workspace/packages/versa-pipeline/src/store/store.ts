@@ -1,90 +1,58 @@
-import { Hookable, createHooks } from "hookable";
-import { filterSensitiveData } from "../filterSensitiveData";
+import { createHooks } from "hookable";
+import { Action, Getter, RawStore, Store } from "./model";
 
-export type AppliedAction<T = any> = (...args: T[]) => T;
+type Tail<T extends any[]> = T extends [any, ...infer U] ? U : never;
 
-export type State = Record<string, any>;
-
-export type Action<T = any> = (state: State, ...args: T[]) => T;
-
-export type Getter<T = any> = (state: State) => T;
-
-export type AppliedGetter<T = any> = (...args: any[]) => T;
-
-export type RawStore<
-  S = State,
-  A = Record<string, AppliedAction>,
-  G = Record<string, AppliedGetter>
-> = {
-  actions?: A;
-  getters?: G;
-  state: S;
-};
-
-export type Store<
-  S = State,
-  A = Record<string, AppliedAction>,
-  G = Record<string, AppliedGetter>
-> = Required<RawStore<S, A, G>> & {
-  hooks: Hookable;
-};
-
-export const createGetters = <
-  S extends State = State,
-  A extends Record<string, AppliedAction> = Record<string, AppliedAction>,
-  G extends Record<string, AppliedGetter> = Record<string, AppliedGetter>
->(
-  store: Store<S, A, G>,
-  getters: Record<string, Getter>
-) => {
-  const appliedGetters: Record<string, AppliedGetter> = {} as Record<
-    string,
-    AppliedGetter
-  >;
-  Object.entries(getters).forEach(([name, getter]) => {
-    appliedGetters[name] = getter(store.state);
-  });
-
-  return appliedGetters;
-};
-
-export const createActions = <
-  S extends State = State,
-  A extends Record<string, AppliedAction> = Record<string, AppliedAction>,
-  G extends Record<string, AppliedGetter> = Record<string, AppliedGetter>
->(
-  store: Store<S, A, G>,
-  actions: Record<string, Action>
-) => {
-  const appliedActions: Record<string, AppliedAction> = {};
-  Object.entries(actions).forEach(([name, action]) => {
-    appliedActions[name] = (...args: any[]) => {
-      store.hooks.callHook(name, ...filterSensitiveData(args));
-      return action(store.state, ...args);
-    };
-  });
-
-  return appliedActions;
-};
+const storeRecord: Record<string, any> = {};
 
 export const createStore = <
-  S extends State = State,
-  A extends Record<string, AppliedAction> = Record<string, AppliedAction>,
-  G extends Record<string, AppliedGetter> = Record<string, AppliedGetter>
+  A extends Record<string, Action<S>>,
+  G extends Record<string, Getter<S>>,
+  S
 >(
-  state: S,
-  actions: Record<string, Action>,
-  getters: Record<string, Getter>
-): Store<S, A, G> => {
-  const store = {
-    state,
-    actions: {} as A,
-    getters: {} as G,
+  name: string,
+  input: RawStore<A, G, S>
+) =>
+  (storeRecord[name] = {
+    actions: wrapActions<S, A>(name, input.actions as any),
+    getters: wrapGetters<S, G>(name, input.getters as any),
     hooks: createHooks(),
-  } as Store<S, A, G>;
+    state: input.state,
+  });
 
-  store.actions = createActions<S, A, G>(store, actions) as A;
-  store.getters = createGetters<S, A, G>(store, getters) as G;
+const wrapActions = <S, A extends Record<string, Action<S>>>(
+  name: string,
+  actions: A
+): {
+  [K in keyof A]: (...args: Tail<Parameters<A[K]>>) => ReturnType<A[K]>;
+} => {
+  const wrappedActions = {} as {
+    [K in keyof A]: (...args: Tail<Parameters<A[K]>>) => ReturnType<A[K]>;
+  };
 
-  return store as Store<S, A, G>;
+  for (const key in actions) {
+    const action = actions[key];
+    wrappedActions[key] = (...args: Tail<Parameters<A[typeof key]>>) => {
+      storeRecord[name].hooks.callHook(key, ...args);
+      return action(storeRecord[name].state, ...args);
+    };
+  }
+
+  return wrappedActions;
+};
+
+const wrapGetters = <S, G extends Record<string, Getter<S>>>(
+  name: string,
+  getters: G
+): { [K in keyof G]: () => ReturnType<G[K]> } => {
+  const wrappedGetters: { [K in keyof G]: () => ReturnType<G[K]> } = {} as {
+    [K in keyof G]: () => ReturnType<G[K]>;
+  };
+
+  for (const key in getters) {
+    const getter = getters[key];
+    wrappedGetters[key] = () => getter(storeRecord[name].state);
+  }
+
+  return wrappedGetters;
 };
